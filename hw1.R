@@ -40,11 +40,11 @@ glimpse(df_od)
 
 p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
   geom_line() +
-  gghighlight(max_highlight = 5L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
-  labs(x="Date", y="% Fatal Drug Overdoses Per Capita", 
-       title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
-       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years"
-       caption="National Center for Health Statistics") +
+  gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
+  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
+       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
+       caption="National Center for Health Statistics",
+       x="Date", y="% Fatal Drug Overdoses Per Capita") +
   theme(panel.background = element_rect(fill = "white", colour = "grey50"),
         panel.grid.major.x = element_line(colour = "grey90"),
         panel.grid.minor.y = element_blank(),
@@ -59,36 +59,35 @@ ggsave(here::here("plots", "fatal_drug_ods.pdf"), plot=p1, device = cairo_pdf)
 Plot
 #======================================================================================================
 
-glimpse(df_od)
 df_ods_by_state <- aggregate(df_od, by=list(df_od$StateName), FUN=mean, na.rm=TRUE)
 
+df_ods_by_state$StateName <- df_ods_by_state$Group.1
+
 glimpse(df_ods_by_state)
+df_ods <- df_ods_by_state %>% select(StateName, FatalitiesPerCap)
+mean_ods <- mean(df_ods$FatalitiesPerCap)
 
-df_ods_by_state[
-  order(df_ods_by_state[,16])
-]
-
-
-ggplot(df_ods_by_state, aes(x=Group.1, y=FatalitiesPerCap, label=FatalitiesPerCap)) +
-  geom_bar
+df_ods$Above <- df_ods$FatalitiesPerCap > mean_ods
+glimpse(df_ods)
+df_ods$Above[df_ods$Above == TRUE] <- "RED"
+df_ods$Above[df_ods$Above == FALSE] <- "GREEN"
   
 
-ggplot(df_ods_by_state, aes(x=Group.1, y=FatalitiesPerCap, label=FatalitiesPerCap)) + 
-    geom_point(stat='identity', size=6)  +
-    scale_color_manual(name="Fatalities", 
-                     labels = c("Above Average", "Below Average")) + 
-  geom_text(color="green", size=2) +
-  labs(title="", 
+p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap, label=format(FatalitiesPerCap, digits=2, nsmall=2))) + 
+    geom_point(stat='identity', aes(col=Above), size=6)  +
+    scale_color_manual(name="Fatalities By Overdose (% of Pop)", 
+                     labels = c("Below Average", "Above Average"), 
+                     values = c("GREEN"="#00ba38", "RED"="#f8766d")) +
+  geom_text(color="black", size=2) +
+  labs(title="New York and West Virginia Lie on Opposite\nPoles of the Opioid Epidemic", 
        subtitle="Fatal Drug Overdoses By State",
-       caption="National Center for Health Statistics") + 
+       caption="National Center for Health Statistics",
+       x="State", y="Fatalities Per Capita (% of Population)") + 
   ylim(0, 2.0) +
   coord_flip() + 
-  theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major.x = element_line(colour = "grey90"),
-        panel.grid.minor.y = element_blank(),
-        text=element_text(family="Lato"))
-  
+  theme(text=element_text(family="Lato"))
 
+ggsave(here::here("plots", "fatal_drug_ods_by_state.pdf"), plot=p2, device = cairo_pdf)
 
 
 #======================================================================================================
@@ -112,7 +111,7 @@ df_rx <- aggregate(df_util[,c("Number of Prescriptions", "Total Amount Reimburse
 df_rx$`Drug Name` <- df_rx$Group.2
 glimpse(df_rx)
 
-p2 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
+p3 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
   geom_point(alpha = 0.7) +
   geom_line(size=1) + 
   scale_y_continuous(labels = dollar) +
@@ -125,11 +124,11 @@ p2 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of 
         panel.grid.minor.y = element_blank(),
         text=element_text(family="Lato"))
 
-p2$labels$size <- "Number of Prescriptions"
-p2$labels$colour <- "Drug Name"
+p3$labels$size <- "Number of Prescriptions"
+p3$labels$colour <- "Drug Name"
 
-p2
-ggsave(here::here("plots", "reimbursement_and_prescription_totals.pdf"), plot=p2, device = cairo_pdf)
+p3
+ggsave(here::here("plots", "reimbursement_and_prescription_totals.pdf"), plot=p3, device = cairo_pdf)
 
 df_util_state <- df_util %>% left_join(., pop, by=c("State"="State"))
 
