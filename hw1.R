@@ -85,7 +85,7 @@ p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPer
        x="State", y="Fatalities Per Capita (% of Population)") + 
   ylim(0, 2.0) +
   coord_flip() + 
-  theme(text=element_text(family="Lato"))
+  theme(text=element_text(family="Lato", margin=margin(t=5, r=5, l=0)))
 
 ggsave(here::here("plots", "fatal_drug_ods_by_state.pdf"), plot=p2, device = cairo_pdf)
 
