@@ -1,3 +1,14 @@
-body{
-  font-family: Lato;
+body {
+  font-family: Georgia;
+  background-color: #E8E9EB;
+  color: #444444;
+  font-size: 16px;
+}
+
+.title {
+  font-family: 'Brandon Grotesque Black';
+}
+
+.author {
+  font-family: 'Brandon Grotesque Light';
 }

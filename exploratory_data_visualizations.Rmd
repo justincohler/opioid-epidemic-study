@@ -1,10 +1,10 @@
 ---
-title: "Exploring the Opioid Epidemic"
-author: "Justin Cohler"
-date: "January 27, 2019"
+title: "EXPLORING THE OPIOID EPIDEMIC"
+author: "JUSTIN COHLER"
 output: 
   html_document:
     code_folding: hide
+    css: "style.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -42,6 +42,87 @@ library(rmarkdown)
 library(gridExtra)
 ```
 
+```{r THEME, echo=FALSE}
+
+bg_color <- "#E8E9EB"
+text_color <- "#444444"
+grid_color <- "#FCFCFC"
+
+jpalette <- c("#FC4445", "#5E2BFF", "#0B132B", "#F9DC5C", "#0F7173", "#55BCC9", "#56E39F", "#F18F01", "#4CB944", "#CAFAFE")
+jfill <- scale_fill_manual(values=jpalette)
+jcolor <- scale_color_manual(values=jpalette) 
+jtheme <- theme_bw() + theme(
+  text = element_text(family="Brandon Grotesque Light", color = text_color),
+
+  # Plot 
+  plot.background = element_rect(fill=bg_color),
+  plot.title = element_text(family="Brandon Grotesque Black"),
+  
+  # Legend
+  legend.text = element_text("Consolas"),
+  legend.title = element_text("Brandon Grotesque Black"),
+  legend.background = element_rect(fill=bg_color),
+  legend.key = element_rect(fill=bg_color),
+  
+  
+  # Axes
+  axis.title = element_text("Brandon Grotesque Black"),
+  axis.line =  element_line(colour=grid_color, size=1),
+  axis.text = element_text(family="Consolas", colour=text_color),
+  axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
+  axis.text.y.left = element_text(margin=margin(10, 10, 10, 10)),
+  
+  axis.line.x.bottom = element_blank(),
+  axis.line.y.left = element_blank(),
+  axis.ticks.x = element_line(colour=grid_color),
+  axis.ticks.y = element_line(colour=grid_color),
+  
+  # Panels
+  panel.background = element_rect(fill=bg_color),
+  panel.border = element_blank(),
+  panel.grid.major.x = element_line(colour=grid_color),
+  panel.grid.major.y = element_line(colour=grid_color),
+  panel.grid.minor.x = element_blank(),
+  panel.grid.minor.y = element_blank()
+)
+
+jtheme_nogrid <- theme_bw() + theme(
+  text = element_text(family="Brandon Grotesque Light", color = text_color),
+
+  # Plot 
+  plot.background = element_rect(fill=bg_color),
+  plot.title = element_text(family="Brandon Grotesque Black"),
+  
+  # Legend
+  legend.text = element_text("Consolas"),
+  legend.title = element_text("Brandon Grotesque Black"),
+  legend.background = element_rect(fill=bg_color),
+  legend.key = element_rect(fill=bg_color),
+  
+  
+  # Axes
+  axis.title = element_text("Brandon Grotesque Black"),
+  axis.line =  element_line(colour=grid_color, size=1),
+  axis.text = element_text(family="Consolas", colour=text_color),
+  axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
+  axis.text.y.left = element_text(margin=margin(10, 10, 10, 10)),
+  
+  axis.line.x.bottom = element_blank(),
+  axis.line.y.left = element_blank(),
+  axis.ticks.x = element_line(colour=grid_color),
+  axis.ticks.y = element_line(colour=grid_color),
+  
+  # Panels
+  panel.background = element_rect(fill=bg_color),
+  panel.border = element_blank(),
+  panel.grid.major.x = element_blank(),
+  panel.grid.major.y = element_blank(),
+  panel.grid.minor.x = element_blank(),
+  panel.grid.minor.y = element_blank()
+)
+
+```
+
 ```{r echo=FALSE, message=FALSE}
 # Pop Per State Data (source: https://www.census.gov/data/tables/2017/demo/popest/nation-total.html)
 pop=read.table("https://www.r-graph-gallery.com/wp-content/uploads/2018/01/pop_US.csv", sep=",", header=T)
@@ -49,7 +130,7 @@ pop$State <- state2abbr(pop$ï..state)
 pop$StateName <- pop$ï..state
 ```
 
-```{r Plot1, message=FALSE}
+```{r Plot1, fig.align='center', message=FALSE}
 df_od <- read_csv(here::here("data", "VSRR_Provisional_Drug_Overdose_Death_Counts.csv"))
 df_od$Date <- parse_date_time(paste(tolower(df_od$Month), df_od$Year), orders=c("by"))
 df_od$NumDeaths <- df_od$`Data Value`
@@ -61,21 +142,18 @@ df_od$FatalitiesPerCap <- df_od$`Data Value`/df_od$pop*100
 p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
   geom_line() +
   gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
-  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
-       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
-       caption="Source: National Center for Health Statistics",
-       x="Date", y="% Fatal Drug Overdoses Per Capita") +
-  theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major.x = element_line(colour = "grey90"),
-        panel.grid.minor.y = element_blank(),
-        text=element_text(family="Lato"))
+  labs(title="WEST VIRGINIA'S OPIOID PROBLEM STANDS \nIN STARK CONTRAST TO REST OF COUNTRY", 
+       subtitle = "DRUG OVERDOSES PER CAPITA OVER THE YEARS",
+       caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
+       x="DATE", y="% FATAL DRUG OVERDOSES PER CAPITA") +
+  jtheme + jfill + jcolor
 
 p1
 ```
 
 Arguably no one has been hit harder by the opioid epidemic than those living in the rust belt and the rural south. One can see above that rural America (Alabama, Arkansas, Kentucky, Tennesee, and West Virginia) comprise some of the states hit hardest per capita by opioid related deaths. Many factors contribute to this scourge on the region, including economic disenfranchisement and high rates of disability enrollment. 
 
-```{r Plot2, message=FALSE, warning=FALSE}
+```{r Plot2, fig.align='center', message=FALSE, warning=FALSE}
 df_ods_by_state <- aggregate(df_od, by=list(df_od$StateName), FUN=mean, na.rm=TRUE)
 df_ods_by_state$StateName <- df_ods_by_state$Group.1
 df_ods <- df_ods_by_state %>% select(StateName, FatalitiesPerCap)
@@ -83,23 +161,21 @@ mean_ods <- mean(df_ods$FatalitiesPerCap)
 
 df_ods$Above <- df_ods$FatalitiesPerCap > mean_ods
 
-df_ods$Above[df_ods$Above == TRUE] <- "RED"
-df_ods$Above[df_ods$Above == FALSE] <- "GREEN"
+df_ods$Above[df_ods$Above == TRUE] <- "BLUE"
+df_ods$Above[df_ods$Above == FALSE] <- "RED"
 
 
 p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap, label=format(FatalitiesPerCap, digits=2, nsmall=2))) + 
   geom_point(stat='identity', aes(col=Above), size=6)  +
-  scale_color_manual(name="Fatalities By Overdose (% of Pop)", 
-                     labels = c("Below Average", "Above Average"), 
-                     values = c("GREEN"="#00ba38", "RED"="#f8766d")) +
-  geom_text(color="black", size=2) +
-  labs(title="New York and West Virginia Lie on Opposite\nPoles of the Opioid Epidemic", 
-       subtitle="Fatal Drug Overdoses By State",
-       caption="Source: National Center for Health Statistics",
-       x="State", y="Fatalities Per Capita (% of Population)") + 
+  scale_color_manual(name="FATALITIES BY OVERDOSE (% OF POP)", 
+                     labels = c("BELOW AVERAGE", "ABOVE AVERAGE")) +
+  labs(title="NEW YORK AND WEST VIRGINIA LIE ON OPPOSITE \nPOLES OF THE OPIOID EPIDEMIC", 
+       subtitle="FATAL DRUG OVERDOSES BY STATE",
+       caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
+       x="STATE", y="FATALITIES PER CAPITA (% OF POP)") + 
   ylim(0, 2.0) +
   coord_flip() + 
-  theme(text=element_text(family="Lato"))
+  jtheme + jfill + jcolor
 p2
 ```
 
@@ -116,7 +192,7 @@ for (i in 2009:2018) {
 }
 ```
 
-```{r Plot3, message=FALSE, warning=FALSE}
+```{r Plot3, fig.align='center', message=FALSE, warning=FALSE}
 df_rx <- aggregate(df_util[,c("Number of Prescriptions", "Total Amount Reimbursed")], by=list(df_util$Year, df_util$`Product Name`), FUN="sum", na.rm=TRUE)
 df_rx$`Drug Name` <- df_rx$Group.2
 
@@ -125,24 +201,21 @@ p3 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of 
   geom_point(alpha = 0.7) +
   geom_line(size=1) + 
   scale_y_continuous(labels = dollar) +
-  labs(title = "Pankiller Reimbursements Shrink While\nPrescriptions Remain Fairly Constant",
-       subtitle = "Expense Reimbursement & Prescriptions over the past 5 years",
-       caption = "Source: Data.Medicaid.gov",
-       x = 'Year', y = 'Total $ Reimbursed') +
-  theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major.x = element_line(colour = "grey90"),
-        panel.grid.minor.y = element_blank(),
-        text=element_text(family="Lato"))
+  labs(title = "PAINKILLER REIMBURSEMENTS SHRINK WHILE \nPRESCRIPTIONS REMAIN FAIRLY CONSTANT",
+       subtitle = "EXPENSE REIMBURSEMENT & PRESCRIPTIONS OVER TIME",
+       caption = "SOURCE: DATA.MEDICAID.GOV",
+       x = 'YEAR', y = 'TOTAL $ REIMBURSED') +
+  jtheme + jfill + jcolor
 
-p3$labels$size <- "Number of Prescriptions"
-p3$labels$colour <- "Drug Name"
+p3$labels$size <- "NUMBER OF PRESCRIPTIONS"
+p3$labels$colour <- "DRUG NAME"
 
 p3
 ```
 
 2015 was a clear reckoning for the US Government's reimbursement of presciption opioids, those contributing most towards the opioid epidemic. The data above shows the prescriptions in cicle size over time, along with the total amount reimbursed, thanks to medicaid data. Economists might anticipate that as less and less reimbusement money is available for prescription opioids, doctors would prescribe fewer pills. Though we do see slightly larger circles as reimbursements go up, it seems that prescriptions aren't very responsive to drug reimbursement. This relationship may show different results in comparing reimbursement to the number of filled prescriptions at the pharmacy.   
 
-```{r Plot4, message=FALSE, warning=FALSE}
+```{r Plot4, fig.align='center', message=FALSE, warning=FALSE}
 df_util$StateName <- abbr2state(df_util$State)
 
 # Drug Overdoses
@@ -174,20 +247,13 @@ centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=carto
 # plot
 p_green <- ggplot() +
     geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#f5f5f9") +
-    scale_fill_gradientn(colours=brewer.pal(9, "Greens"), name="Opioid Related Deaths", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
+    scale_fill_gradientn(colours=brewer.pal(9, "Greens"), name="OPIOID RELATED DEATHS", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(data=centers, aes(x=x, y=y, label=id), color="#444444", size=3, alpha=0.6) +
     theme_void() +
-    labs( title=paste("Where Overdose Deaths Hit Hardest\n",yr),
-          subtitle="Cartogram of deaths across the US",
-          caption="Source: VSSR, Data.Medicaid.gov") +
-    theme(legend.position = c(0.5, 0.9),
-      legend.direction = "horizontal",
-      text = element_text(family="Lato", color = "#333333"),
-      plot.background = element_rect(fill = "#f5f5f9", color = NA), 
-      panel.background = element_rect(fill = "#f5f5f9", color = NA), 
-      legend.background = element_rect(fill = "#f5f5f9", color = NA),
-      plot.title = element_text(size= 22, hjust=0.5, color = "#444444", margin = margin(b = -0.1, t = 0.4, l = 2, unit = "cm"))
-    ) +
+    labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST\n",yr),
+          subtitle="CARTOGRAM OF DEATHS ACROSS THE US",
+          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") +
+    jtheme_nogrid + 
     coord_map()  
 
 ```
@@ -196,20 +262,13 @@ p_green <- ggplot() +
 ```{r Plot5, message=FALSE, warning=FALSE}
 p_blue <- ggplot() +
     geom_polygon(data = carto_fortified, aes(fill = NumRxPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#f5f5f9") +
-    scale_fill_gradientn(colours=brewer.pal(9, "Blues"), name="Prescription Rates", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
+    scale_fill_gradientn(colours=brewer.pal(9, "Blues"), name="PRESCRIPTION RATES", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(data=centers, aes(x=x, y=y, label=id), color="#444444", size=3, alpha=0.6) +
     theme_void() +
-    labs( title=paste("Where Drugs Leave the Hospital\n",yr),
-          subtitle="Cartogram of key opioid prescription rates across the US",
-          caption="Source: VSSR, Data.Medicaid.gov") +
-    theme(legend.position = c(0.5, 0.9),
-      legend.direction = "horizontal",
-      text = element_text(family="Lato", color = "#333333"),
-      plot.background = element_rect(fill = "#f5f5f9", color = NA), 
-      panel.background = element_rect(fill = "#f5f5f9", color = NA), 
-      legend.background = element_rect(fill = "#f5f5f9", color = NA),
-      plot.title = element_text(size= 22, hjust=0.5, color = "#444444", margin = margin(b = -0.1, t = 0.4, l = 2, unit = "cm"))
-    ) +
+    labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL\n",yr),
+          subtitle="CARTOGRAM OF KEY OPIOID PRESCRIPTION RATES ACROSS THE US",
+          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") +
+    jtheme_nogrid +
     coord_map()  
 
 
@@ -223,4 +282,5 @@ The rust belt in 2018 saw the worst of opioid related drug overdoses. This likel
 ```{r}
 p_blue
 ```
+
 Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or that most people are not getting addicted to opioids from injury.
