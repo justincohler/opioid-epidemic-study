@@ -8,20 +8,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, dpi = 300, warning=FALSE)
 ```
 
 ```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
-library(tidyverse)
 library(geojsonio)
-library(here)
 library(RColorBrewer)
 library(cartogram)
 library(broom)
 library(rgeos)
 library(mapproj)
-library(dplyr)
-library(rmarkdown)
 library(tidyverse)
 library(here)
 library(ggrepel)
@@ -33,13 +29,16 @@ library(extrafont)
 library(devtools)
 library(scales)
 library(openintro)
-library(gganimate)
-library(gifski)
 library(gapminder)
 library(png)
 library(dplyr)
 library(rmarkdown)
 library(gridExtra)
+library(maps)
+library(gganimate)
+library(gapminder)
+library(gifski)
+
 ```
 
 ```{r THEME, echo=FALSE}
@@ -50,12 +49,12 @@ grid_color <- "#FCFCFC"
 
 jpalette <- c("#FC4445", "#5E2BFF", "#0B132B", "#F9DC5C", "#0F7173", "#55BCC9", "#56E39F", "#F18F01", "#4CB944", "#CAFAFE")
 jfill <- scale_fill_manual(values=jpalette)
-jcolor <- scale_color_manual(values=jpalette) 
+jcolor <- scale_colour_manual(values=jpalette) 
 jtheme <- theme_bw() + theme(
   text = element_text(family="Brandon Grotesque Light", color = text_color),
 
   # Plot 
-  plot.background = element_rect(fill=bg_color),
+  plot.background = element_rect(fill=bg_color, color = NA),
   plot.title = element_text(family="Brandon Grotesque Black"),
   
   # Legend
@@ -186,10 +185,15 @@ DRUG_NAMES <- c("VICODIN", "OXYCODONE", "OXYCONTIN", "PERCOCET",
                 "OPANA", "KADIAN", "AVINZA", "FENTANYL")
 
 fname_drug_utilization <- "State_Drug_Utilization_Data_"
-df_util <- read_csv(here::here("data", paste(fname_drug_utilization, "2008", ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)
-for (i in 2009:2018) {
-  df_util <- rbind(df_util, read_csv(here::here("data", paste(fname_drug_utilization, i, ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)) 
-}
+
+# First time processing of DataFrame
+#df_util <- read_csv(here::here("data", paste(fname_drug_utilization, "2008", ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)
+#for (i in 2009:2018) {
+#  df_util <- rbind(df_util, read_csv(here::here("data", paste(fname_drug_utilization, i, ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)) 
+#}
+
+#readr::write_csv(df_util, here::here("data", "df_util.csv"))
+df_util <- read_csv(here::here("data", "df_util.csv"))
 ```
 
 ```{r Plot3, fig.align='center', message=FALSE, warning=FALSE}
@@ -240,11 +244,9 @@ spdf@data = spdf@data %>% mutate(google_name = gsub(" \\(United States\\)", "", 
 spdf@data = spdf@data %>% left_join(., df_ods_by_state, by=c("google_name"="StateName"))
 cartogram <- cartogram_cont(spdf, 'FatalitiesPer')
 
-# tidy data to be drawn by ggplot2 (broom library of the tidyverse)
 carto_fortified <- tidy(cartogram, region = "google_name") %>% left_join(. , cartogram@data, by=c("id"="google_name")) 
 centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=cartogram@data$iso3166_2))   
 
-# plot
 p_green <- ggplot() +
     geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#f5f5f9") +
     scale_fill_gradientn(colours=brewer.pal(9, "Greens"), name="OPIOID RELATED DEATHS", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
@@ -284,3 +286,59 @@ p_blue
 ```
 
 Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or that most people are not getting addicted to opioids from injury.
+
+```{r Plot 6, message=FALSE, warning=FALSE}
+US <- map_data("world") %>% filter(region=="USA")
+data=us.cities
+
+df_util$`NUMBER OF PRESCRIPTIONS` = df_util$`Number of Prescriptions`
+df_util$`PRODUCT NAME` = df_util$`Product Name`
+unique(df_util$`Product Name`)
+df_util %>% filter(df_util$`Product Name` %in% c("OXYCODONE", "OXYCONTIN")) %>%
+  #arrange(`Number of Prescriptions`) %>%
+  #mutate( name=factor(name, unique(name))) %>%
+  #mutate(pop=pop/1000000) %>%
+  ggplot() +
+    geom_polygon(data = US, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
+    geom_point(width=2, height=2, aes(x=Longitude, y=Latitude, size=`NUMBER OF PRESCRIPTIONS`, color=`PRODUCT NAME`), shape=20, stroke=FALSE) +
+    scale_size_continuous(name="NUMBER OF PRESCRIPTIONS", range=c(1,12)) +
+    #scale_alpha_continuous(name="Year", range=c(0.1, .7)) +
+    xlim(-125, -70) + ylim(25,50) + coord_map() + 
+    guides(color=guide_legend(title="PRODUCT NAME")) +
+    jtheme_nogrid + jcolor +
+    labs(title = "OXY'S MOVEMENT SHOWS A LULL\nBETWEEN 2012-2014", subtitle='PRESCRIPTIONS THROUGH THE YEARS: {frame_time}', caption="SOURCE: MEDICAID.GOV") +
+  #transition_states(year, transition_length = 2, state_length=3) +
+  transition_time(Year) +
+    ease_aes('linear', interval = 1.0) 
+
+```
+
+Shown above are the proliferation of prescriptions of two of the most dangerously addictive opioids, Oxycodone and Oxycontin, by their site of prescription over the past ten years from 2008 to 2018. Circle sizes show relative number of prescriptions for each location overlayed on the US map. Alaska and Hawaii were omitted from this graphic, and were very low in total number of prescriptions. Interestingly, there is a noticeable lull between the years of 2012 and 2014, where fewer prescriptions are doled out. Additionally, one might expect these to follow population segments, however, while there is a dense corridor of prescriptions on the east coast, the west coast does not display similar levels of opioid prescription rates at any point during the sampled time period.
+
+```{r Plot 7, message=FALSE, warning=FALSE}
+df_fda <- read_tsv(here::here("data", "fda", "Submissions.txt"))
+df_sub_class <- read_tsv(here::here("data", "fda", "SubmissionClass_Lookup.txt"))
+df_fda <- df_fda %>% left_join(., df_sub_class, by=c("SubmissionClassCodeID"="SubmissionClassCodeID"))
+
+df_fda <- df_fda %>% filter(!(SubmissionClassCodeDescription %in% c("Labeling", "Not Applicable", "Supplement", "Efficacy", "REMS", "Medical Gas", NA)))
+df_fda$Year <- format(as.Date(df_fda$SubmissionStatusDate, format="%Y-%m-%d"),"%Y")
+df <- df_fda %>% select(Year, "SubmissionClassCode")
+df$ones <- 1
+
+df <- aggregate(df$ones, by=list(df$Year, "Submission Type"=df$SubmissionClassCode), FUN="sum", na.rm=TRUE)
+df$Year <- strtoi(df$Group.1)
+df$Total <- df$x
+
+df_fda$Year <- strtoi(df_fda$Year)
+
+df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
+    geom_bar(stat='identity') +
+    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
+  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  transition_states(year, transition_length = 2, state_length=3) +
+  transition_time(Year) +
+  ease_aes('linear', interval = .1) 
+```
+
+While over the years, various types of drug submissions have fluctuated, the early 2000s showed major spikes in "Bioequivalent" drug submission type, new drugs to perform similar functions as existing drugs. Other submission types, for context are "New Molecular Entities" (Type 1), "New Active Ingredient" (Type 2), "New Dosage Form" (Type 3), "New Combination" (Type 4), "New Formulation/Manufacturer" (Type 5), etc. Note that in the 70s and 80s, New Manufacturers spiked. In the 2000s, Bioequivalence, New Dosage Forms, and New Combinations spiked most. This appears to show a shift from acquisitions of drug manufacturers into rebranding of existing drugs, and pivots towards different dosages. Further research could shed light on the nature of Type 3 dosage changes, and if the FDA has approved dosage increases at an extraordinary rate.

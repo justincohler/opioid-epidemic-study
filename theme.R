@@ -89,7 +89,7 @@ jtheme_nogrid <- theme_bw() + theme(
 
 
 ggplot(wdata, aes(x = weight)) +
-  labs(title="STUDY SHOWS CHARTS ARE COOL",
+  labs(title="SCOOP",
        subtitle="THIS FROM ALL STUDIES EVER",
        x="WEIGHT",
        y="COUNT",
