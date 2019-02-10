@@ -11,6 +11,69 @@ library(extrafont)
 library(devtools)
 library(scales)
 library(openintro)
+install.packages("fiftystater")
+
+library(installr)
+updateR()
+
+bg_color <- "#7A777A"
+text_color <- "#EEEEEE"
+grid_color <- "#BBBBBB"
+
+fonttable()
+fonts()
+
+loadfonts()
+
+jtheme <- theme_bw() + theme(
+  text = element_text(family="Quick", color = text_color),
+  
+  # Plot 
+  plot.background = element_rect(fill=bg_color),
+  plot.title = element_text(fontface="bold"),
+  
+  # Legend
+  legend.text = element_text("Consolas"),
+  legend.title = element_text(fontface="bold"),
+  legend.background = element_rect(fill=bg_color),
+  legend.key = element_rect(fill=bg_color),
+  
+  
+  # Axes
+  axis.line =  element_line(colour=grid_color),
+  axis.text = element_text(family="Consolas", colour=text_color),
+  axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
+  axis.text.y.left = element_text(margin=margin(10, 10, 10, 10)),
+  
+  #axis.title = element_text(family="Quick"),
+  axis.line.x.bottom = element_blank(),
+  axis.line.y.left = element_blank(),
+  axis.ticks.x = element_line(colour=grid_color),
+  axis.ticks.y = element_line(colour=grid_color),
+  
+  # Panels
+  panel.background = element_rect(fill=bg_color),
+  panel.border = element_blank(),
+  panel.grid.major.x = element_line(colour=grid_color),
+  panel.grid.major.y = element_line(colour=grid_color),
+  panel.grid.minor.x = element_blank(),
+  panel.grid.minor.y = element_blank()
+)
+
+
+p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
+  geom_line() +
+  gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
+  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
+       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
+       caption="National Center for Health Statistics",
+       x="Date", y="% Fatal Drug Overdoses Per Capita") +
+  jtheme
+
+p1
+
+scale_color_manual(values=c("1"="#41B3A3", "2"="#E27D60", "3"="#C38D9E", "4"="#E8A87C", "5"="#85DCB"))
+scale_fill_manual(values=c("1"="#41B3A3", "2"="#E27D60", "3"="#C38D9E", "4"="#E8A87C", "5"="#85DCB"))
 
 
 fonts()
@@ -50,6 +113,15 @@ p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=
         panel.grid.minor.y = element_blank(),
         text=element_text(family="Lato"))
 
+p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
+  geom_line() +
+  gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
+  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
+       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
+       caption="National Center for Health Statistics",
+       x="Date", y="% Fatal Drug Overdoses Per Capita") +
+  jtheme
+
 p1
 ggsave(here::here("plots", "fatal_drug_ods.pdf"), plot=p1, device = cairo_pdf)
 
@@ -85,8 +157,8 @@ p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPer
        x="State", y="Fatalities Per Capita (% of Population)") + 
   ylim(0, 2.0) +
   coord_flip() + 
-  theme(text=element_text(family="Lato", margin=margin(t=5, r=5, l=0)))
-
+  theme(text=element_text(family="Lato"), axis.text.y.top =10)
+p2
 ggsave(here::here("plots", "fatal_drug_ods_by_state.pdf"), plot=p2, device = cairo_pdf)
 
 
