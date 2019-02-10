@@ -42,6 +42,8 @@ library(gifski)
 ```
 
 ```{r THEME, echo=FALSE}
+#font_import()
+#fonts()
 
 bg_color <- "#E8E9EB"
 text_color <- "#444444"
@@ -51,21 +53,23 @@ jpalette <- c("#FC4445", "#5E2BFF", "#0B132B", "#F9DC5C", "#0F7173", "#55BCC9", 
 jfill <- scale_fill_manual(values=jpalette)
 jcolor <- scale_colour_manual(values=jpalette) 
 jtheme <- theme_bw() + theme(
-  text = element_text(family="Brandon Grotesque Light", color = text_color),
+  text = element_text(family="Quick", color = text_color),
 
   # Plot 
   plot.background = element_rect(fill=bg_color, color = NA),
-  plot.title = element_text(family="Brandon Grotesque Black"),
+  plot.title = element_text(family="Quick"),
+  plot.subtitle = element_text(family="Consolas"),
+  plot.caption = element_text(size=8),
   
   # Legend
   legend.text = element_text("Consolas"),
-  legend.title = element_text("Brandon Grotesque Black"),
+  legend.title = element_text("Quick"),
   legend.background = element_rect(fill=bg_color),
   legend.key = element_rect(fill=bg_color),
   
   
   # Axes
-  axis.title = element_text("Brandon Grotesque Black"),
+  axis.title = element_text("Quick"),
   axis.line =  element_line(colour=grid_color, size=1),
   axis.text = element_text(family="Consolas", colour=text_color),
   axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
@@ -85,31 +89,31 @@ jtheme <- theme_bw() + theme(
   panel.grid.minor.y = element_blank()
 )
 
-jtheme_nogrid <- theme_bw() + theme(
-  text = element_text(family="Brandon Grotesque Light", color = text_color),
+jtheme_nogrid <- theme_bw() + theme(  
+  text = element_text(family="Quick", color = text_color),
 
   # Plot 
   plot.background = element_rect(fill=bg_color),
-  plot.title = element_text(family="Brandon Grotesque Black"),
+  plot.title = element_text(family="Quick"),
+  plot.subtitle = element_text(family="Consolas"),
+  plot.caption = element_text(size=8),
   
   # Legend
   legend.text = element_text("Consolas"),
-  legend.title = element_text("Brandon Grotesque Black"),
+  legend.title = element_text("Quick"),
   legend.background = element_rect(fill=bg_color),
   legend.key = element_rect(fill=bg_color),
   
   
   # Axes
-  axis.title = element_text("Brandon Grotesque Black"),
+  axis.title = element_blank(),
   axis.line =  element_line(colour=grid_color, size=1),
-  axis.text = element_text(family="Consolas", colour=text_color),
-  axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
-  axis.text.y.left = element_text(margin=margin(10, 10, 10, 10)),
+  axis.text = element_blank(),
   
   axis.line.x.bottom = element_blank(),
   axis.line.y.left = element_blank(),
-  axis.ticks.x = element_line(colour=grid_color),
-  axis.ticks.y = element_line(colour=grid_color),
+  axis.ticks.x = element_blank(),
+  axis.ticks.y = element_blank(),
   
   # Panels
   panel.background = element_rect(fill=bg_color),
@@ -126,7 +130,7 @@ jtheme_nogrid <- theme_bw() + theme(
 # Pop Per State Data (source: https://www.census.gov/data/tables/2017/demo/popest/nation-total.html)
 pop=read.table("https://www.r-graph-gallery.com/wp-content/uploads/2018/01/pop_US.csv", sep=",", header=T)
 pop$State <- state2abbr(pop$ï..state)
-pop$StateName <- pop$ï..state
+pop$`StateName` <- pop$ï..state
 ```
 
 ```{r Plot1, fig.align='center', message=FALSE}
@@ -136,23 +140,23 @@ df_od$NumDeaths <- df_od$`Data Value`
 df_od <- df_od %>% filter(`Indicator`=='Number of Deaths' & `State` != 'US')
 df_od <- df_od %>% left_join(., pop, by=c("State"="State"))
 df_od$FatalitiesPerCap <- df_od$`Data Value`/df_od$pop*100
-
+df_
 
 p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
   geom_line() +
   gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
   labs(title="WEST VIRGINIA'S OPIOID PROBLEM STANDS \nIN STARK CONTRAST TO REST OF COUNTRY", 
-       subtitle = "DRUG OVERDOSES PER CAPITA OVER THE YEARS",
+       subtitle = "Drug Overdoses per Capita Over the Years",
        caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
        x="DATE", y="% FATAL DRUG OVERDOSES PER CAPITA") +
-  jtheme + jfill + jcolor
+  jtheme + jcolor
 
 p1
 ```
 
 Arguably no one has been hit harder by the opioid epidemic than those living in the rust belt and the rural south. One can see above that rural America (Alabama, Arkansas, Kentucky, Tennesee, and West Virginia) comprise some of the states hit hardest per capita by opioid related deaths. Many factors contribute to this scourge on the region, including economic disenfranchisement and high rates of disability enrollment. 
 
-```{r Plot2, fig.align='center', message=FALSE, warning=FALSE}
+```{r Plot2, fig.align='center', fig.height=8, message=FALSE, warning=FALSE}
 df_ods_by_state <- aggregate(df_od, by=list(df_od$StateName), FUN=mean, na.rm=TRUE)
 df_ods_by_state$StateName <- df_ods_by_state$Group.1
 df_ods <- df_ods_by_state %>% select(StateName, FatalitiesPerCap)
@@ -160,21 +164,24 @@ mean_ods <- mean(df_ods$FatalitiesPerCap)
 
 df_ods$Above <- df_ods$FatalitiesPerCap > mean_ods
 
-df_ods$Above[df_ods$Above == TRUE] <- "BLUE"
-df_ods$Above[df_ods$Above == FALSE] <- "RED"
+df_ods$Above[df_ods$Above == TRUE] <- "ABOVE AVERAGE"
+df_ods$Above[df_ods$Above == FALSE] <- "BELOW AVERAGE"
 
 
-p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap, label=format(FatalitiesPerCap, digits=2, nsmall=2))) + 
-  geom_point(stat='identity', aes(col=Above), size=6)  +
+p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap)) + 
+  geom_point(stat='identity', aes(col=Above, label=format(FatalitiesPerCap, digits=2, nsmall=2)), size=6)  +
   scale_color_manual(name="FATALITIES BY OVERDOSE (% OF POP)", 
                      labels = c("BELOW AVERAGE", "ABOVE AVERAGE")) +
   labs(title="NEW YORK AND WEST VIRGINIA LIE ON OPPOSITE \nPOLES OF THE OPIOID EPIDEMIC", 
-       subtitle="FATAL DRUG OVERDOSES BY STATE",
+       subtitle="Fatal Drug Overdoses by State",
        caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
-       x="STATE", y="FATALITIES PER CAPITA (% OF POP)") + 
-  ylim(0, 2.0) +
-  coord_flip() + 
-  jtheme + jfill + jcolor
+       x="STATE", y="FATALITIES PER CAPITA (% OF POP)") +
+  ylim(0.4, 1.4) +
+  jtheme + jfill + jcolor + 
+  theme(
+     panel.grid.major.x = element_blank()
+  ) + coord_flip() 
+  
 p2
 ```
 
@@ -206,7 +213,7 @@ p3 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of 
   geom_line(size=1) + 
   scale_y_continuous(labels = dollar) +
   labs(title = "PAINKILLER REIMBURSEMENTS SHRINK WHILE \nPRESCRIPTIONS REMAIN FAIRLY CONSTANT",
-       subtitle = "EXPENSE REIMBURSEMENT & PRESCRIPTIONS OVER TIME",
+       subtitle = "Expense Reimbursement & Prescriptions Over Time\n\n",
        caption = "SOURCE: DATA.MEDICAID.GOV",
        x = 'YEAR', y = 'TOTAL $ REIMBURSED') +
   jtheme + jfill + jcolor
@@ -248,30 +255,52 @@ carto_fortified <- tidy(cartogram, region = "google_name") %>% left_join(. , car
 centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=cartogram@data$iso3166_2))   
 
 p_green <- ggplot() +
-    geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#f5f5f9") +
+    geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#222222") +
     scale_fill_gradientn(colours=brewer.pal(9, "Greens"), name="OPIOID RELATED DEATHS", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
-    geom_text(data=centers, aes(x=x, y=y, label=id), color="#444444", size=3, alpha=0.6) +
-    theme_void() +
-    labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST\n",yr),
-          subtitle="CARTOGRAM OF DEATHS ACROSS THE US",
-          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") +
-    jtheme_nogrid + 
-    coord_map()  
+    geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#222222", size=3, alpha=0.6) +
+    labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST: ",yr),
+          subtitle="Cartogram of Opioid Related Deaths Across the US",
+          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") + 
+    coord_map() +
+    jtheme_nogrid +
+    theme(
+        plot.background = element_rect(fill=bg_color, color = NA),
+        panel.background =  element_rect(fill=bg_color, color = NA),
+        strip.background =  element_rect(fill=bg_color, color = NA),
+        strip.background.x =  element_rect(fill=bg_color, color = NA),
+        strip.background.y =  element_rect(fill=bg_color, color = NA),
+        legend.background = element_rect(fill=bg_color, color=NA),
+        legend.box.background = element_rect(fill=bg_color, color=NA),
+        plot.margin = margin(53,0,53,0,"pt")
+    ) 
 
 ```
 
 
 ```{r Plot5, message=FALSE, warning=FALSE}
 p_blue <- ggplot() +
-    geom_polygon(data = carto_fortified, aes(fill = NumRxPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#f5f5f9") +
-    scale_fill_gradientn(colours=brewer.pal(9, "Blues"), name="PRESCRIPTION RATES", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
-    geom_text(data=centers, aes(x=x, y=y, label=id), color="#444444", size=3, alpha=0.6) +
-    theme_void() +
-    labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL\n",yr),
-          subtitle="CARTOGRAM OF KEY OPIOID PRESCRIPTION RATES ACROSS THE US",
+    geom_polygon(data = carto_fortified, 
+                 aes(fill = NumRxPer, x = long, y = lat, group = group) , 
+                 size=0.05, alpha=0.9, color="#222222") +
+    scale_fill_gradientn(colours=brewer.pal(9, "Blues"), name="PRESCRIPTION RATES", 
+                         guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
+    geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#222222", size=3, alpha=0.6) +
+    labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL: ",yr),
+          subtitle="Cartogram of Key Opioid Prescription Rates Across US the US",
           caption="SOURCE: VSSR, DATA.MEDICAID.GOV") +
+    coord_map()  +
     jtheme_nogrid +
-    coord_map()  
+    theme(
+        plot.background = element_rect(fill=bg_color, color = NA),
+        panel.background =  element_rect(fill=bg_color, color = NA),
+        strip.background =  element_rect(fill=bg_color, color = NA),
+        strip.background.x =  element_rect(fill=bg_color, color = NA),
+        strip.background.y =  element_rect(fill=bg_color, color = NA),
+        legend.background = element_rect(fill=bg_color, color=NA),
+        legend.box.background = element_rect(fill=bg_color, color=NA),
+        plot.margin = margin(46,0,47,0,"pt")
+    ) 
+
 
 
 #grid.arrange(p_green, p_blue, nrow = 2)
@@ -287,35 +316,34 @@ p_blue
 
 Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or that most people are not getting addicted to opioids from injury.
 
-```{r Plot 6, message=FALSE, warning=FALSE}
+```{r Plot 6, message=FALSE, warning=FALSE, gganimate.options = list(renderer = ffmpeg_renderer())}
 US <- map_data("world") %>% filter(region=="USA")
 data=us.cities
 
 df_util$`NUMBER OF PRESCRIPTIONS` = df_util$`Number of Prescriptions`
 df_util$`PRODUCT NAME` = df_util$`Product Name`
-unique(df_util$`Product Name`)
-df_util %>% filter(df_util$`Product Name` %in% c("OXYCODONE", "OXYCONTIN")) %>%
-  #arrange(`Number of Prescriptions`) %>%
-  #mutate( name=factor(name, unique(name))) %>%
-  #mutate(pop=pop/1000000) %>%
-  ggplot() +
-    geom_polygon(data = US, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
-    geom_point(width=2, height=2, aes(x=Longitude, y=Latitude, size=`NUMBER OF PRESCRIPTIONS`, color=`PRODUCT NAME`), shape=20, stroke=FALSE) +
-    scale_size_continuous(name="NUMBER OF PRESCRIPTIONS", range=c(1,12)) +
-    #scale_alpha_continuous(name="Year", range=c(0.1, .7)) +
-    xlim(-125, -70) + ylim(25,50) + coord_map() + 
-    guides(color=guide_legend(title="PRODUCT NAME")) +
-    jtheme_nogrid + jcolor +
-    labs(title = "OXY'S MOVEMENT SHOWS A LULL\nBETWEEN 2012-2014", subtitle='PRESCRIPTIONS THROUGH THE YEARS: {frame_time}', caption="SOURCE: MEDICAID.GOV") +
-  #transition_states(year, transition_length = 2, state_length=3) +
-  transition_time(Year) +
-    ease_aes('linear', interval = 1.0) 
+#df_util %>% filter(df_util$`Product Name` %in% c("OXYCODONE", "OXYCONTIN")) %>%
+#  #arrange(`Number of Prescriptions`) %>%
+#  #mutate( name=factor(name, unique(name))) %>%
+#  #mutate(pop=pop/1000000) %>%
+#  ggplot() +
+#    geom_polygon(data = US, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
+#    geom_point(width=2, height=2, aes(x=Longitude, y=Latitude, size=`NUMBER OF PRESCRIPTIONS`, color=`PRODUCT NAME`), shape=20, stroke=FALSE) +
+#    scale_size_continuous(name="NUMBER OF PRESCRIPTIONS", range=c(1,12)) +
+#    #scale_alpha_continuous(name="Year", range=c(0.1, .7)) +
+#    xlim(-125, -70) + ylim(25,50) + coord_map() + 
+#    guides(color=guide_legend(title="PRODUCT NAME")) +
+#    jtheme_nogrid + jcolor +
+#    labs(title = "OXY'S MOVEMENT SHOWS A LULL\nBETWEEN 2012-2014", subtitle='PRESCRIPTIONS THROUGH THE YEARS: {frame_time}', caption="SOURCE: MEDICAID.GOV") +
+#  #transition_states(year, transition_length = 2, state_length=3) +
+#  transition_time(Year) +
+#    ease_aes('linear', interval = 1.0) 
 
 ```
 
 Shown above are the proliferation of prescriptions of two of the most dangerously addictive opioids, Oxycodone and Oxycontin, by their site of prescription over the past ten years from 2008 to 2018. Circle sizes show relative number of prescriptions for each location overlayed on the US map. Alaska and Hawaii were omitted from this graphic, and were very low in total number of prescriptions. Interestingly, there is a noticeable lull between the years of 2012 and 2014, where fewer prescriptions are doled out. Additionally, one might expect these to follow population segments, however, while there is a dense corridor of prescriptions on the east coast, the west coast does not display similar levels of opioid prescription rates at any point during the sampled time period.
 
-```{r Plot 7, message=FALSE, warning=FALSE}
+```{r Plot 7, message=FALSE, warning=FALSE, gganimate.options = list(renderer = ffmpeg_renderer())}
 df_fda <- read_tsv(here::here("data", "fda", "Submissions.txt"))
 df_sub_class <- read_tsv(here::here("data", "fda", "SubmissionClass_Lookup.txt"))
 df_fda <- df_fda %>% left_join(., df_sub_class, by=c("SubmissionClassCodeID"="SubmissionClassCodeID"))
@@ -331,14 +359,19 @@ df$Total <- df$x
 
 df_fda$Year <- strtoi(df_fda$Year)
 
-df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
-    geom_bar(stat='identity') +
-    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
-  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  transition_states(year, transition_length = 2, state_length=3) +
-  transition_time(Year) +
-  ease_aes('linear', interval = .1) 
+#df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
+#    geom_bar(stat='identity') +
+#    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
+#  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
+#  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+#  transition_states(year, transition_length = 2, state_length=3) +
+#  transition_time(Year) +
+#  ease_aes('linear', interval = .1) 
 ```
 
 While over the years, various types of drug submissions have fluctuated, the early 2000s showed major spikes in "Bioequivalent" drug submission type, new drugs to perform similar functions as existing drugs. Other submission types, for context are "New Molecular Entities" (Type 1), "New Active Ingredient" (Type 2), "New Dosage Form" (Type 3), "New Combination" (Type 4), "New Formulation/Manufacturer" (Type 5), etc. Note that in the 70s and 80s, New Manufacturers spiked. In the 2000s, Bioequivalence, New Dosage Forms, and New Combinations spiked most. This appears to show a shift from acquisitions of drug manufacturers into rebranding of existing drugs, and pivots towards different dosages. Further research could shed light on the nature of Type 3 dosage changes, and if the FDA has approved dosage increases at an extraordinary rate.
+
+
+```{r}
+
+```
