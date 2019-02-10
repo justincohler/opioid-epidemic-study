@@ -87,7 +87,8 @@ jtheme <- theme_bw() + theme(
   panel.grid.major.x = element_line(colour=grid_color),
   panel.grid.major.y = element_line(colour=grid_color),
   panel.grid.minor.x = element_blank(),
-  panel.grid.minor.y = element_blank()
+  panel.grid.minor.y = element_blank(),
+  
 )
 
 jtheme_nogrid <- theme_bw() + theme(  
@@ -383,9 +384,17 @@ wv_df <- read_csv(here::here("data", "west_virginia_county_data.csv"))
 
 wv <- wv_shape %>% 
   left_join(wv_df, by = c("FIPS" = "FIPS"))
+wv$`OD DEATH RATE` <- wv$`Drug Overdose Mortality Rate`
 
 glimpse(wv_df)
 
 ggplot(data = wv) +
-  geom_sf(aes(fill=`% Rural`)) + jtheme_nogrid
+  geom_sf(aes(fill=`OD DEATH RATE`, alpha=`% Unemployed`)) + 
+  labs(title="AREAS OF UNEMPLOYMENT ARE\nHIT HARDEST BY DRUGS",
+       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
+  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "Percent unemployment and\ndeaths by overdose\nare highly correlated") +
+  jtheme_nogrid +
+  theme(
+    plot.title = element_text()
+  )
 ```
