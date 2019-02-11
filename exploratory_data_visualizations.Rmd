@@ -39,19 +39,34 @@ library(gganimate)
 library(gapminder)
 library(gifski)
 library(sf)
-
+library(directlabels)
 ```
 
 ```{r THEME, echo=FALSE}
 #font_import()
 #fonts()
 
-bg_color <- "#E8E9EB"
+#bg_color <- "#E8E9EB"
+bg_color <- "#FFFFFF"
 text_color <- "#444444"
-grid_color <- "#FCFCFC"
+grid_color <- "#ECECEC"
 
-jpalette <- c("#FC4445", "#5E2BFF", "#0B132B", "#F9DC5C", "#0F7173", "#55BCC9", "#56E39F", "#F18F01", "#4CB944", "#CAFAFE")
+RED <- "#FC4445"
+BLUE <- "#5E2BFF"
+YELLOW <- "#F9DC5c"
+AQUA <- "#0F7173"
+LIGHT_GREEN <- "#56E39F"
+ORANGE <- "#F18F01"
+BRIGHT_GREEN <- "#4CB944"
+WHITE <- "#CAFAFE"
+SKY <- "#55BCC9"
+MIDNIGHT <- "#0B132B"
+
+jpalette <- c(RED, BLUE, AQUA, LIGHT_GREEN, YELLOW,  ORANGE, BRIGHT_GREEN, WHITE, SKY, MIDNIGHT)
 jfill <- scale_fill_manual(values=jpalette)
+jfillc <- scale_fill_continuous(low=BLUE, high=RED)
+jfillc2 <- scale_fill_continuous(low=BRIGHT_GREEN, high=BLUE)
+jalpha <- scale_alpha_continuous(range=c(.2,1))
 jcolor <- scale_colour_manual(values=jpalette) 
 jtheme <- theme_bw() + theme(
   text = element_text(family="Quick", color = text_color),
@@ -61,6 +76,7 @@ jtheme <- theme_bw() + theme(
   plot.title = element_text(family="Quick"),
   plot.subtitle = element_text(family="Consolas"),
   plot.caption = element_text(size=8),
+  plot.margin=grid::unit(c(0,0,0,0), "mm"),
   
   # Legend
   legend.text = element_text("Consolas"),
@@ -99,6 +115,7 @@ jtheme_nogrid <- theme_bw() + theme(
   plot.title = element_text(family="Quick"),
   plot.subtitle = element_text(family="Consolas"),
   plot.caption = element_text(size=8),
+  plot.margin=grid::unit(c(0,0,0,0), "mm"),
   
   # Legend
   legend.text = element_text("Consolas"),
@@ -142,7 +159,7 @@ df_od$NumDeaths <- df_od$`Data Value`
 df_od <- df_od %>% filter(`Indicator`=='Number of Deaths' & `State` != 'US')
 df_od <- df_od %>% left_join(., pop, by=c("State"="State"))
 df_od$FatalitiesPerCap <- df_od$`Data Value`/df_od$pop*100
-df_
+df_od <- df_od[order(df_od$FatalitiesPerCap),]
 
 p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
   geom_line() +
@@ -151,6 +168,7 @@ p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=
        subtitle = "Drug Overdoses per Capita Over the Years",
        caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
        x="DATE", y="% FATAL DRUG OVERDOSES PER CAPITA") +
+  guides(color=guide_legend(title="STATE"))+
   jtheme + jcolor
 
 p1
@@ -173,7 +191,7 @@ df_ods$Above[df_ods$Above == FALSE] <- "BELOW AVERAGE"
 p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap)) + 
   geom_point(stat='identity', aes(col=Above, label=format(FatalitiesPerCap, digits=2, nsmall=2)), size=6)  +
   scale_color_manual(name="FATALITIES BY OVERDOSE (% OF POP)", 
-                     labels = c("BELOW AVERAGE", "ABOVE AVERAGE")) +
+                     labels = c("BELOW AVERAGE", "ABOVE AVERAGE"), values=jpalette) +
   labs(title="NEW YORK AND WEST VIRGINIA LIE ON OPPOSITE \nPOLES OF THE OPIOID EPIDEMIC", 
        subtitle="Fatal Drug Overdoses by State",
        caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
@@ -205,12 +223,12 @@ fname_drug_utilization <- "State_Drug_Utilization_Data_"
 df_util <- read_csv(here::here("data", "df_util.csv"))
 ```
 
-```{r Plot3, fig.align='center', message=FALSE, warning=FALSE}
+```{r Plot3, fig.align='center', fig.height=6, message=FALSE, warning=FALSE}
 df_rx <- aggregate(df_util[,c("Number of Prescriptions", "Total Amount Reimbursed")], by=list(df_util$Year, df_util$`Product Name`), FUN="sum", na.rm=TRUE)
 df_rx$`Drug Name` <- df_rx$Group.2
+df_rxImportant <- df_rx %>% filter(`Drug Name` %in% c("OXYCODONE", "FENTANYL",  "KADIAN", "OXYCONTIN"))
 
-
-p3 <-  df_rx %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
+p3 <-  df_rxImportant %>% ggplot(aes(Group.1, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
   geom_point(alpha = 0.7) +
   geom_line(size=1) + 
   scale_y_continuous(labels = dollar) +
@@ -258,7 +276,7 @@ centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=carto
 
 p_green <- ggplot() +
     geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#222222") +
-    scale_fill_gradientn(colours=brewer.pal(9, "Greens"), name="OPIOID RELATED DEATHS", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
+    scale_fill_gradient(low=BLUE, high=RED, name="OPIOID RELATED DEATHS", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#222222", size=3, alpha=0.6) +
     labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST: ",yr),
           subtitle="Cartogram of Opioid Related Deaths Across the US",
@@ -279,12 +297,12 @@ p_green <- ggplot() +
 ```
 
 
-```{r Plot5, message=FALSE, warning=FALSE}
+```{r Plot5, fig.align='center', message=FALSE, warning=FALSE}
 p_blue <- ggplot() +
     geom_polygon(data = carto_fortified, 
                  aes(fill = NumRxPer, x = long, y = lat, group = group) , 
                  size=0.05, alpha=0.9, color="#222222") +
-    scale_fill_gradientn(colours=brewer.pal(9, "Blues"), name="PRESCRIPTION RATES", 
+    scale_fill_gradient(low=BLUE, high=RED, name="PRESCRIPTIONS PER 100K", 
                          guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#222222", size=3, alpha=0.6) +
     labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL: ",yr),
@@ -318,34 +336,29 @@ p_blue
 
 Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or that most people are not getting addicted to opioids from injury.
 
-```{r Plot 6, message=FALSE, warning=FALSE, gganimate.options = list(renderer = ffmpeg_renderer())}
+```{r Plot6, message=FALSE, warning=FALSE}
 US <- map_data("world") %>% filter(region=="USA")
 data=us.cities
 
 df_util$`NUMBER OF PRESCRIPTIONS` = df_util$`Number of Prescriptions`
 df_util$`PRODUCT NAME` = df_util$`Product Name`
 df_util %>% filter(df_util$`Product Name` %in% c("OXYCODONE", "OXYCONTIN")) %>%
-  #arrange(`Number of Prescriptions`) %>%
-  #mutate( name=factor(name, unique(name))) %>%
-  #mutate(pop=pop/1000000) %>%
   ggplot() +
     geom_polygon(data = US, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
     geom_point(width=2, height=2, aes(x=Longitude, y=Latitude, size=`NUMBER OF PRESCRIPTIONS`, color=`PRODUCT NAME`), shape=20, stroke=FALSE) +
     scale_size_continuous(name="NUMBER OF PRESCRIPTIONS", range=c(1,12)) +
-    #scale_alpha_continuous(name="Year", range=c(0.1, .7)) +
     xlim(-125, -70) + ylim(25,50) + coord_map() + 
     guides(color=guide_legend(title="PRODUCT NAME")) +
     jtheme_nogrid + jcolor +
     labs(title = "OXY'S MOVEMENT SHOWS A LULL\nBETWEEN 2012-2014", subtitle='PRESCRIPTIONS THROUGH THE YEARS: {frame_time}', caption="SOURCE: MEDICAID.GOV") +
-  #transition_states(year, transition_length = 2, state_length=3) +
   transition_time(Year) +
-    ease_aes('linear', interval = 1.0) 
+    ease_aes('linear', interval=1) 
 
 ```
 
 Shown above are the proliferation of prescriptions of two of the most dangerously addictive opioids, Oxycodone and Oxycontin, by their site of prescription over the past ten years from 2008 to 2018. Circle sizes show relative number of prescriptions for each location overlayed on the US map. Alaska and Hawaii were omitted from this graphic, and were very low in total number of prescriptions. Interestingly, there is a noticeable lull between the years of 2012 and 2014, where fewer prescriptions are doled out. Additionally, one might expect these to follow population segments, however, while there is a dense corridor of prescriptions on the east coast, the west coast does not display similar levels of opioid prescription rates at any point during the sampled time period.
 
-```{r Plot 7, message=FALSE, warning=FALSE, gganimate.options = list(renderer = ffmpeg_renderer())}
+```{r Plot7, message=FALSE, warning=FALSE}
 df_fda <- read_tsv(here::here("data", "fda", "Submissions.txt"))
 df_sub_class <- read_tsv(here::here("data", "fda", "SubmissionClass_Lookup.txt"))
 df_fda <- df_fda %>% left_join(., df_sub_class, by=c("SubmissionClassCodeID"="SubmissionClassCodeID"))
@@ -361,24 +374,23 @@ df$Total <- df$x
 
 df_fda$Year <- strtoi(df_fda$Year)
 
-#df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
-#    geom_bar(stat='identity') +
-#    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
-#  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
-#  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-#  transition_states(year, transition_length = 2, state_length=3) +
-#  transition_time(Year) +
-#  ease_aes('linear', interval = .1) 
+df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
+    geom_bar(stat='identity') +
+    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
+  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  transition_states(year, transition_length = 2, state_length=3) +
+  transition_time(Year) +
+  ease_aes('linear', interval=1)
+
 ```
 
 While over the years, various types of drug submissions have fluctuated, the early 2000s showed major spikes in "Bioequivalent" drug submission type, new drugs to perform similar functions as existing drugs. Other submission types, for context are "New Molecular Entities" (Type 1), "New Active Ingredient" (Type 2), "New Dosage Form" (Type 3), "New Combination" (Type 4), "New Formulation/Manufacturer" (Type 5), etc. Note that in the 70s and 80s, New Manufacturers spiked. In the 2000s, Bioequivalence, New Dosage Forms, and New Combinations spiked most. This appears to show a shift from acquisitions of drug manufacturers into rebranding of existing drugs, and pivots towards different dosages. Further research could shed light on the nature of Type 3 dosage changes, and if the FDA has approved dosage increases at an extraordinary rate.
 
 
-```{r}
+```{r Plot8, message=FALSE, warning=FALSE}
 wv_shape <- st_read(here::here("data", "tl_2018_54_cousub.shp"))
 wv_shape$FIPS <- strtoi(paste(wv_shape$STATEFP, wv_shape$COUNTYFP, sep=''))
-glimpse(wv_shape)
-
 
 wv_df <- read_csv(here::here("data", "west_virginia_county_data.csv"))
 
@@ -386,15 +398,39 @@ wv <- wv_shape %>%
   left_join(wv_df, by = c("FIPS" = "FIPS"))
 wv$`OD DEATH RATE` <- wv$`Drug Overdose Mortality Rate`
 
-glimpse(wv_df)
-
 ggplot(data = wv) +
-  geom_sf(aes(fill=`OD DEATH RATE`, alpha=`% Unemployed`)) + 
-  labs(title="AREAS OF UNEMPLOYMENT ARE\nHIT HARDEST BY DRUGS",
+  geom_sf(aes(fill=`OD DEATH RATE`, alpha=`% Unemployed`, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05) + 
+  labs(title="WEST VIRGINIA'S CONCENTRATED AREAS OF\nUNEMPLOYMENT ARE HIT HARDEST BY DRUG ABUSE",
        caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
-  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "Percent unemployment and\ndeaths by overdose\nare highly correlated") +
-  jtheme_nogrid +
+  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's unemployment rate\nand number of deaths\nby overdose are\nhighly correlated") +
+  #geom_text(aes(label = ifelse(FIPS==54109, "Wyoming County", "")), stat="identity", vjust=-1)+
+  #geom_label(data=subset(wv, FIPS==54109), aes(label="Wyoming County")) +
+  jtheme_nogrid + jfillc + jalpha +
+  guides(
+   color = guide_colorbar(title="OD DEATH RATE"),
+   alpha = guide_legend(title="% UNEMPLOYED\n(OPACITY)")
+ ) +
   theme(
-    plot.title = element_text()
+    plot.title = element_text(),
+    plot.margin=grid::unit(c(0,0,0,0), "mm")
   )
 ```
+Digging into the state where the opioid epidemic has run most rampant, the data clearly show a harrowing case in the southwest of West Virginia. Wyoming County has the highest rate of drug overdoses resulting in death, and appears as the brightest pink in the southwest corridor. The more opaque counties represent a greater percentage of those unemployed. In the graphic above, as the percent unemployment exceeds double digits, the opacity appears as solid. Unsurprisingly, the more solid colors align with those counties where the OD rates soar, showing how all encompassing the opioid epidemic is; among the data there is a feedback loop of strongly correlated adverse outcomes (% unemployment, low levels of education, etc.) with high rates of opioid abuse.
+
+```{r Plot9, message=FALSE, warning=FALSE}
+ggplot(data = wv) +
+  geom_sf(aes(fill=`% Food Insecure`, alpha=`Food Environment Index`), size=0.05) + 
+  labs(title="SOUTHWEST WEST VIRGINIA, WHERE MOST OPIOID ABUSE OCCURS,\n EXPERIENCES CRIPPLING FOOD INSECURITY",
+       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
+  annotate("text", x = -80.4, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's Food Insecurity \nPercentages, colored along\nwith food availability\nindex encoded with opacity\nshows familiar hotspots") +
+  jtheme_nogrid + jfillc2 + jalpha +
+  guides(
+   color = guide_colorbar(title="% Food Insecure"),
+   alpha = guide_legend(title="Food Environment Index\n(OPACITY)")
+ ) +
+  theme(
+    plot.title = element_text(),
+    plot.margin=grid::unit(c(0,0,0,0), "mm")
+  )
+```
+In exploring food insecurity, the majority of those who are food insecure reside in counties where opioid abuse is prevalant. In the above graphic, we now see the more opaque the county, the better their Food Environment Index is, a Bureau of Health and Human Services index of grocery options. Additionally, we see the percentage of those deemed highly food insecure appear more blue. Wyoming County once more is among the most food insecure of all counties in Wyoming. The county is overwhelmingly white, at 97.3%, and unremarkable in its graduation rate and english proficiency among Wyoming Counties. 
