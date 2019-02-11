@@ -366,18 +366,26 @@ df_fda <- df_fda %>% left_join(., df_sub_class, by=c("SubmissionClassCodeID"="Su
 df_fda <- df_fda %>% filter(!(SubmissionClassCodeDescription %in% c("Labeling", "Not Applicable", "Supplement", "Efficacy", "REMS", "Medical Gas", NA)))
 df_fda$Year <- format(as.Date(df_fda$SubmissionStatusDate, format="%Y-%m-%d"),"%Y")
 df <- df_fda %>% select(Year, "SubmissionClassCode")
+df$Type <- case_when(
+  df$`SubmissionClassCode`  == "TYPE 1" ~ "NEW MOLECULAR ENTITY",
+  df$`SubmissionClassCode`  == "TYPE 2" ~ "NEW ACTIVE INGREDIENT",
+  df$`SubmissionClassCode`  == "TYPE 3" ~ "NEW DOSAGE",
+  df$`SubmissionClassCode`  == "TYPE 4" ~ "NEW COMBINATION",
+  df$`SubmissionClassCode`  == "TYPE 5" ~ "NEW MANUFACTURER",
+  TRUE ~ "OTHER"
+)
 df$ones <- 1
 
-df <- aggregate(df$ones, by=list(df$Year, "Submission Type"=df$SubmissionClassCode), FUN="sum", na.rm=TRUE)
-df$Year <- strtoi(df$Group.1)
-df$Total <- df$x
+df7 <- aggregate(df$ones, by=list("Year"=strtoi(df$Year), "Submission Type"=df$Type), FUN="sum", na.rm=TRUE)
 
-df_fda$Year <- strtoi(df_fda$Year)
 
-df %>% ggplot(aes(x=`Submission Type`, y=`Total`, fill=`Submission Type`, color=`Submission Type`)) +
+
+glimpse(df7)
+
+df7 %>% ggplot(aes(x=`Submission Type`, y=x, fill=`Submission Type`, color=`Submission Type`)) +
     geom_bar(stat='identity') +
-    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', caption="SOURCE: FDA.GOV")+
-  guides(colour=guide_legend(nrow=30)) + jtheme + ylim(0,100) + 
+    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', y="TOTAL", caption="SOURCE: FDA.GOV")+
+  guides(colour=guide_legend(nrow=30)) + jtheme + jfill + ylim(0,100) + 
   theme(axis.text.x = element_text(angle=90, hjust=1)) +
   transition_states(year, transition_length = 2, state_length=3) +
   transition_time(Year) +
