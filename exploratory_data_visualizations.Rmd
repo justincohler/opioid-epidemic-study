@@ -146,6 +146,11 @@ jtheme_nogrid <- theme_bw() + theme(
 )
 
 ```
+```{r palette, echo=FALSE, message=FALSE, fig.height=0.08}
+palette_df <- data.frame("NAME"=c("A", "B", "C", "D", "E"), "VALUE"= c(1, 1, 1, 1, 1))
+separator <- palette_df %>% ggplot(aes(x=NAME, fill=NAME)) + geom_bar(width=1) + jtheme_nogrid + jfill + guides(fill=FALSE) 
+separator
+  ```
 
 ```{r echo=FALSE, message=FALSE}
 # Pop Per State Data (source: https://www.census.gov/data/tables/2017/demo/popest/nation-total.html)
@@ -413,6 +418,7 @@ x %>%
 ```
 
 ### Looking Southwest
+
 Digging into the state where the opioid epidemic has run most rampant, the data clearly show a harrowing case particularly in the southwest of West Virginia. Wyoming County has the highest rate of drug overdoses resulting in death, and appears as the brightest pink in the southwest corridor. The below map plots not only the overdose mortality rate, but the highly correlated effect of the percent of the population who are food insecure, defined broadly by the USDA as "a socioeconomic condition of limited or uncertain access to enough food to support a healthy life". Unsurprisingly, the brighter red counties align with those counties where the overdose mortality rates soar, showing how all encompassing the opioid epidemic is; among the data there is a feedback loop of strongly correlated adverse outcomes (% unemployment, % food insecure, low levels of education, etc.) with high rates of opioid abuse.
 
 ```{r Plot8, message=FALSE, warning=FALSE}
