@@ -1,8 +1,12 @@
 body {
-  font-family: Georgia;
+  font-family: "Georgia";
   background-color: #FFFFFF;
   color: #444444;
   font-size: 16px;
+}
+
+h3 {
+  font-family: "Quick";
 }
 
 body .main-container {

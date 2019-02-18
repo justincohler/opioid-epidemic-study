@@ -1,6 +1,6 @@
 ---
-title: "EXPLORING THE OPIOID EPIDEMIC"
-author: "JUSTIN COHLER"
+title: "THE BROAD IMPACT OF OPIOID OVERDOSES ACROSS THE US"
+author: "Justin Cohler"
 output: 
   html_document:
     code_folding: hide
@@ -66,7 +66,7 @@ MIDNIGHT <- "#0B132B"
 
 jpalette <- c(RED, BLUE, AQUA, LIGHT_GREEN, YELLOW,  ORANGE, BRIGHT_GREEN, WHITE, SKY, MIDNIGHT)
 jfill <- scale_fill_manual(values=jpalette)
-jfillc <- scale_fill_continuous(low=BLUE, high=RED, na.value="#cfcfcf")
+jfillc <- scale_fill_continuous(low=AQUA, high=RED, na.value="#cfcfcf")
 jfillc2 <- scale_fill_continuous(low=BRIGHT_GREEN, high=BLUE, na.value="#cfcfcf")
 jalpha <- scale_alpha_continuous(range=c(.2,1))
 jcolor <- scale_colour_manual(values=jpalette) 
@@ -153,6 +153,8 @@ pop <- read_csv(here::here("data", "us_pop.csv"))
 pop$State <- state2abbr(pop$StateName)
 ```
 
+In the previous five years, arguably no one has been hit harder by the opioid epidemic than those living in the rust belt and the rural south. Below it is apparaent that rural America (West Virginia, Tennessee, Maine, Kentucky, and Alabama) comprise the states who have been hit hardest per capita by opioid related deaths. Many factors contribute to this scourge on the region, including economic disenfranchisement and low education levels, as we explore in greater detail below. West Virginia remains exceptionally affected by this scourge, with more than 1.25% of cause-of-deaths in 2018 attributed towards drug overdoses.  
+
 ```{r Plot1, fig.align='center', message=FALSE}
 df_od <- read_csv(here::here("data", "VSRR_Provisional_Drug_Overdose_Death_Counts.csv"))
 df_od$Date <- parse_date_time(paste(tolower(df_od$Month), df_od$Year), orders=c("by"))
@@ -162,7 +164,6 @@ df_od <- df_od %>% left_join(., pop, by=c("State"="State"))
 df_od$FatalitiesPerCap <- df_od$`Data Value`/df_od$pop
 df_od <- df_od[order(df_od$FatalitiesPerCap),]
 
-glimpse(df_od)
 p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`*100, group=`StateName`, colour=`StateName`)) +
   geom_line() +
   gghighlight(max_highlight = 5L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
@@ -176,7 +177,7 @@ p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`*100, group=`StateName`, col
 p1
 ```
 
-Arguably no one has been hit harder by the opioid epidemic than those living in the rust belt and the rural south. One can see above that rural America (Alabama, Arkansas, Kentucky, Tennesee, and West Virginia) comprise some of the states hit hardest per capita by opioid related deaths. Many factors contribute to this scourge on the region, including economic disenfranchisement and high rates of disability enrollment. 
+While West Virginia is most intensely affected among US states, no state is immune to the epidemic; even in New York, the state whose opioid-related death rate is lowest per capita, one half of one percent of the population will die from a drug-related overdose. The standard deviation of opioid abuse's impact on states is smaller than one might guess if they are only reading articles (https://www.nytimes.com/interactive/2018/us/west-virginia-opioids.html) about the plight of West Virginia. While West Virginia is without question an outlier as shown in the list below, no corner of the country is unaffected today.
 
 ```{r Plot2, fig.align='center', fig.height=8, message=FALSE, warning=FALSE}
 df_ods_by_state <- aggregate(df_od, by=list(df_od$StateName), FUN=mean, na.rm=TRUE)
@@ -189,26 +190,24 @@ df_ods$Above <- df_ods$FatalitiesPerCap*100 > mean_ods
 df_ods$Above[df_ods$Above == TRUE] <- "ABOVE AVERAGE"
 df_ods$Above[df_ods$Above == FALSE] <- "BELOW AVERAGE"
 
-glimpse(df_ods)
 p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap*100), y=FatalitiesPerCap*100)) + 
   geom_point(stat='identity', aes(col=Above, label=format(FatalitiesPerCap, digits=2, nsmall=2)), size=4)  +
   scale_color_manual(name="FATALITIES BY OVERDOSE (% OF POP)", 
-                     labels = c("BELOW AVERAGE", "ABOVE AVERAGE"), values=jpalette) +
+                     labels = c("ABOVE AVERAGE", "BELOW AVERAGE"), values=c(RED, AQUA)) +
   labs(title="NEW YORK AND WEST VIRGINIA LIE ON OPPOSITE \nPOLES OF THE OPIOID EPIDEMIC", 
        subtitle="Fatal Drug Overdoses by State",
        caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
        x="STATE", y="FATALITIES PER CAPITA (% OF POP)") +
   ylim(0.4, 1.4) +
-  jtheme + jfill + jcolor +
-  guides(color=guide_legend(title="OD RATE", reverse=TRUE))+
+  jtheme +
+  guides(color=guide_legend(title="OD MORTALITY RATE", reverse=TRUE))+
   theme(
      panel.grid.major.x = element_blank()
   ) + coord_flip() 
 
 p2
 ```
-
-While West Virginia is most intensely affected among US states, no state is immune to the epidemic; even in New York, the state whose opioid-related death rate is lowest per capita, one half of one percent of the population will die from a drug-related overdose. The standard deviation of opioid abuse's impact on states is smaller than one might guess if they are only reading articles (https://www.nytimes.com/interactive/2018/us/west-virginia-opioids.html) about the plight of West Virginia. While West Virginia is an outlier as shown in the above plot, this is a nationwide epidemic.
+2015 was a clear reckoning for the US Government's reimbursement of presciption opioids, those contributing most towards the opioid epidemic. The data below shows the prescriptions in cicle size over time, along with the total amount reimbursed, thanks to Medicaid data. While one might anticipate that as less and less reimbusement money is available for prescription opioids, doctors would prescribe fewer pills. Though we do see slightly larger circles as reimbursements go up, it seems that prescriptions aren't very responsive to drug reimbursement. This relationship may show different results in comparing reimbursement to the number of filled prescriptions at the pharmacy.  
 
 ```{r LoadDrugUtilization, message=FALSE, warning=FALSE}
 DRUG_NAMES <- c("VICODIN", "OXYCODONE", "OXYCONTIN", "PERCOCET", 
@@ -234,23 +233,25 @@ df_rxImportant <- df_rxImportant[order(df_rxImportant$`Number of Prescriptions`)
 df_rxImportant$`Total Amount Reimbursed` <- df_rxImportant$`Total Amount Reimbursed`/1e6
 df_rxImportant$Date <- as.Date(as.character(df_rxImportant$Group.1), "%Y")
 
-p3 <-  df_rxImportant %>% ggplot(aes(Date, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
-  geom_point(alpha = 0.7) +
-  geom_line(size=1) + 
+df_rxImportant %>% ggplot(aes(Date, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
+  geom_point(alpha = 0.6) +
+  geom_line(size=0.1) + 
   scale_y_continuous(labels = dollar) +
   labs(title = "PAINKILLER REIMBURSEMENTS SHRINK WHILE \nPRESCRIPTIONS REMAIN FAIRLY CONSTANT",
        subtitle = "Expense Reimbursement & Prescriptions Over Time\n\n",
        caption = "SOURCE: DATA.MEDICAID.GOV",
-       x = 'YEAR', y = 'TOTAL REIMBURSED (MILLIONS USD)') +
+       x = 'YEAR', y = 'TOTAL REIMBURSED (MILLIONS USD)',
+       size="NUMBER OF PRESCRIPTIONS",
+       colour="DRUG NAME") +
   jtheme + 
-  scale_colour_manual(values=c(AQUA, LIGHT_GREEN, BLUE, RED)) 
-  p3$labels$size <- "NUMBER OF PRESCRIPTIONS"
-p3$labels$colour <- "DRUG NAME"
+  scale_colour_manual(values=c(BLUE, LIGHT_GREEN, AQUA, RED)) +
+  guides(color=guide_legend(reverse=TRUE)) 
 
-p3
+
+
 ```
 
-2015 was a clear reckoning for the US Government's reimbursement of presciption opioids, those contributing most towards the opioid epidemic. The data above shows the prescriptions in cicle size over time, along with the total amount reimbursed, thanks to medicaid data. Economists might anticipate that as less and less reimbusement money is available for prescription opioids, doctors would prescribe fewer pills. Though we do see slightly larger circles as reimbursements go up, it seems that prescriptions aren't very responsive to drug reimbursement. This relationship may show different results in comparing reimbursement to the number of filled prescriptions at the pharmacy.   
+Middle America in 2018 saw the worst of opioid related drug overdoses. Middle America's plight with drugs likely has to do with smuggling routes, with major hubs in cities like Chicago. The rural west appears to be relatively minimally affected, with states along the Sierra Nevadas showing low rates of overdose deaths. In the Northeast, results are mixed, with coastal mid-atlantic states faring much better than the rural border states like New Hampshire. While New York is a clear outlier in its resistance to the epidemic, Utah is also comparitively well off due to the relatively high Mormon population in the state.
 
 ```{r Plot4, fig.align='center', message=FALSE, warning=FALSE}
 df_util$StateName <- abbr2state(df_util$State)
@@ -281,8 +282,8 @@ carto_fortified <- tidy(cartogram, region = "google_name") %>% left_join(. , car
 centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=cartogram@data$iso3166_2))   
 
 p_green <- ggplot() +
-    geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color="#cccccc") +
-    scale_fill_gradient(low=BLUE, high=RED, name="OPIOID RELATED DEATHS\nPER CAPITA", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
+    geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color=text_color) +
+    scale_fill_gradient(low=AQUA, high=RED, name="OPIOID RELATED DEATHS\nPER CAPITA", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#ffffff", size=3, alpha=1.0) +
     labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST: ",yr),
           subtitle="Cartogram of Opioid Related Deaths Across the US",
@@ -302,11 +303,10 @@ p_green <- ggplot() +
 
 p_green
 ```
-Middle America in 2018 saw the worst of opioid related drug overdoses, though most states had greater than a 4% rate of death by druge overdose. Middle America's plight with drugs likely has to do with smuggling routes, with major hubs in cities like Chicago. The rural west appears to be relatively minimally affected, with states along the Sierra Nevadas showing low rates of overdose deaths. In the Northeast, results are mixed, with coastal mid-atlantic states faring much better than the rural border states like New Hampshire.
+Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions doled out in 2018, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or at the notion that most people's opioid sourcing does not originate from hospitals or pharmacies.
 
 
 ```{r Plot5, fig.align='center', message=FALSE, warning=FALSE}
-glimpse(df_util)
 df_util_pop <- df_util %>% left_join(., pop, by=c("State"="State"))
 
 df_util_pop$NumRxPer <- df_util_pop$`Number of Prescriptions`/df_util_pop$pop
@@ -314,7 +314,6 @@ df_util_pop$StateName <- df_util_pop$StateName.x
 yr=2018
 
 df_util_pop <- df_util_pop %>% filter(Year == yr)
-glimpse(df_util_pop)
 df_util_pop <- aggregate(list(NumRxPer=df_util_pop$NumRxPer), by=list(StateName=df_util_pop$StateName), FUN="sum", na.rm=TRUE)
 
 # Import Cartogram Polygons, merge drug overdose data
@@ -329,8 +328,8 @@ centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=carto
 p_blue <- ggplot() +
     geom_polygon(data = carto_fortified, 
                  aes(fill = NumRxPer, x = long, y = lat, group = group) , 
-                 size=0.05, alpha=0.9, color="#cccccc") +
-    scale_fill_gradient(low=BLUE, high=RED, name="PRESCRIPTIONS PER CAPITA", 
+                 size=0.05, alpha=0.9, color=text_color) +
+    scale_fill_gradient(low=AQUA, high=RED, name="PRESCRIPTIONS PER CAPITA", 
                          guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
     geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#ffffff", size=2, alpha=1.0) +
     labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL: ",yr),
@@ -352,117 +351,23 @@ p_blue <- ggplot() +
 p_blue
 
 ```
-Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or that most people are not getting addicted to opioids from injury.
 
-```{r Plot6, message=FALSE, warning=FALSE}
-US <- map_data("world") %>% filter(region=="USA")
-data=us.cities
+In the West Virginia Department of Health and Human Resources' 2018 report, each county provided demographic and various quality of health and life data. The  cross-section below correlates various features of the West Virginia population with its overdose mortality rate in 2018. Topping the charts for positive correlation are poor access to food, and preventable hospital visits, while counties with poor graduation rates and household incomes also correlate with overdose mortality heavily.  
 
-df_util$`NUMBER OF PRESCRIPTIONS` = df_util$`Number of Prescriptions`
-df_util$`PRODUCT NAME` = df_util$`Product Name`
-#df_util %>% filter(df_util$`Product Name` %in% c("OXYCODONE", "OXYCONTIN")) %>%
-#  ggplot() +
-#    geom_polygon(data = US, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
-#    geom_point(width=2, height=2, aes(x=Longitude, y=Latitude, size=`NUMBER OF PRESCRIPTIONS`, color=`PRODUCT NAME`), shape=20, stroke=FALSE) #+
-#    scale_size_continuous(name="NUMBER OF PRESCRIPTIONS", range=c(1,12)) +
-#    xlim(-125, -70) + ylim(25,50) + coord_map() + 
-#    guides(color=guide_legend(title="PRODUCT NAME")) +
-##    jtheme_nogrid + jcolor +
-#    labs(title = "OXY'S MOVEMENT SHOWS A LULL\nBETWEEN 2012-2014", subtitle='PRESCRIPTIONS THROUGH THE YEARS: {frame_time}', caption="SOURCE: #MEDICAID.GOV") +
-#  transition_time(Year) +
-#    ease_aes('linear', interval=1) 
-
-```
-
-Shown above are the proliferation of prescriptions of two of the most dangerously addictive opioids, Oxycodone and Oxycontin, by their site of prescription over the past ten years from 2008 to 2018. Circle sizes show relative number of prescriptions for each location overlayed on the US map. Alaska and Hawaii were omitted from this graphic, and were very low in total number of prescriptions. Interestingly, there is a noticeable lull between the years of 2012 and 2014, where fewer prescriptions are doled out. Additionally, one might expect these to follow population segments, however, while there is a dense corridor of prescriptions on the east coast, the west coast does not display similar levels of opioid prescription rates at any point during the sampled time period.
-
-```{r Plot7, message=FALSE, warning=FALSE}
-df_fda <- read_tsv(here::here("data", "fda", "Submissions.txt"))
-df_sub_class <- read_tsv(here::here("data", "fda", "SubmissionClass_Lookup.txt"))
-df_fda <- df_fda %>% left_join(., df_sub_class, by=c("SubmissionClassCodeID"="SubmissionClassCodeID"))
-
-df_fda <- df_fda %>% filter(!(SubmissionClassCodeDescription %in% c("Labeling", "Not Applicable", "Supplement", "Efficacy", "REMS", "Medical Gas", NA)))
-df_fda$Year <- format(as.Date(df_fda$SubmissionStatusDate, format="%Y-%m-%d"),"%Y")
-df <- df_fda %>% select(Year, "SubmissionClassCode")
-df$Type <- case_when(
-  df$`SubmissionClassCode`  == "TYPE 1" ~ "NEW MOLECULAR ENTITY",
-  df$`SubmissionClassCode`  == "TYPE 2" ~ "NEW ACTIVE INGREDIENT",
-  df$`SubmissionClassCode`  == "TYPE 3" ~ "NEW DOSAGE",
-  df$`SubmissionClassCode`  == "TYPE 4" ~ "NEW COMBINATION",
-  df$`SubmissionClassCode`  == "TYPE 5" ~ "NEW MANUFACTURER",
-  TRUE ~ "OTHER"
-)
-df$ones <- 1
-
-df7 <- aggregate(df$ones, by=list("Year"=strtoi(df$Year), "Submission Type"=df$Type), FUN="sum", na.rm=TRUE)
-
-
-
-glimpse(df7)
-
-#df7 %>% ggplot(aes(x=`Submission Type`, y=x, fill=`Submission Type`, color=`Submission Type`)) +
-#    geom_bar(stat='identity') +
-#    labs(title = "FDA DRUG SUBMISSION TYPES", subtitle='SUBMISSION TRENDS THROUGH THE YEARS: {frame_time}', y="TOTAL", caption="SOURCE: #FDA.GOV")+
-#  guides(colour=guide_legend(nrow=30)) + jtheme + jfill + ylim(0,100) + 
-#  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-#  transition_states(year, transition_length = 2, state_length=3) +
-#  transition_time(Year) +
-#  ease_aes('linear', interval=1)
-
-```
-
-While over the years, various types of drug submissions have fluctuated, the early 2000s showed major spikes in "Bioequivalent" drug submission type, new drugs to perform similar functions as existing drugs. Other submission types, for context are "New Molecular Entities" (Type 1), "New Active Ingredient" (Type 2), "New Dosage Form" (Type 3), "New Combination" (Type 4), "New Formulation/Manufacturer" (Type 5), etc. Note that in the 70s and 80s, New Manufacturers spiked. In the 2000s, Bioequivalence, New Dosage Forms, and New Combinations spiked most. This appears to show a shift from acquisitions of drug manufacturers into rebranding of existing drugs, and pivots towards different dosages. Further research could shed light on the nature of Type 3 dosage changes, and if the FDA has approved dosage increases at an extraordinary rate.
-
-
-```{r Plot8, message=FALSE, warning=FALSE}
+```{r ReadWV, message=FALSE, warning=FALSE, echo=FALSE, include=FALSE}
 wv_shape <- st_read(here::here("data", "tl_2018_54_cousub.shp"))
 wv_shape$FIPS <- strtoi(paste(wv_shape$STATEFP, wv_shape$COUNTYFP, sep=''))
 
 wv_df <- read_csv(here::here("data", "west_virginia_county_data.csv"))
 wv_df$cor_od_food <- wv_df$`Drug Overdose Mortality Rate` * wv_df$`% Food Insecure`
-wv_df
 wv <- wv_shape %>% 
   left_join(wv_df, by = c("FIPS" = "FIPS"))
 wv$`OD DEATH RATE` <- wv$`Drug Overdose Mortality Rate`
-
-ggplot(data = wv) +
-  geom_sf(aes(fill=cor_od_food, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05) + 
-  labs(title="WEST VIRGINIA'S CONCENTRATED AREAS OF\nUNEMPLOYMENT ARE HIT HARDEST BY DRUG ABUSE",
-       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
-  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's unemployment rate\nand number of deaths\nby overdose are\nhighly correlated") +
-  #geom_text(aes(label = ifelse(FIPS==54109, "Wyoming County", "")), stat="identity", vjust=-1)+
-  #geom_label(data=subset(wv, FIPS==54109), aes(label="Wyoming County")) +
-  jtheme_nogrid + jfillc + jalpha +
-  theme(
-    plot.title = element_text(),
-    plot.margin=grid::unit(c(0,0,0,0), "mm")
-  )
 ```
-Digging into the state where the opioid epidemic has run most rampant, the data clearly show a harrowing case in the southwest of West Virginia. Wyoming County has the highest rate of drug overdoses resulting in death, and appears as the brightest pink in the southwest corridor. The more opaque counties represent a greater percentage of those unemployed. In the graphic above, as the percent unemployment exceeds double digits, the opacity appears as solid. Unsurprisingly, the more solid colors align with those counties where the OD rates soar, showing how all encompassing the opioid epidemic is; among the data there is a feedback loop of strongly correlated adverse outcomes (% unemployment, low levels of education, etc.) with high rates of opioid abuse.
-
-```{r Plot9, message=FALSE, warning=FALSE}
-ggplot(data = wv) +
-  geom_sf(aes(fill=`% Food Insecure`, alpha=`Food Environment Index`), size=0.05) + 
-  labs(title="SOUTHWEST WEST VIRGINIA, WHERE MOST OPIOID ABUSE OCCURS,\n EXPERIENCES CRIPPLING FOOD INSECURITY",
-       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
-  annotate("text", x = -80.4, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's Food Insecurity \nPercentages, colored along\nwith food availability\nindex encoded with opacity\nshows familiar hotspots") +
-  jtheme_nogrid + jfillc2 + jalpha +
-  guides(
-   color = guide_colorbar(title="% Food Insecure"),
-   alpha = guide_legend(title="Food Environment Index\n(OPACITY)")
- ) +
-  theme(
-    plot.title = element_text(),
-    plot.margin=grid::unit(c(0,0,0,0), "mm")
-  )
-```
-In exploring food insecurity, the majority of those who are food insecure reside in counties where opioid abuse is prevalant. In the above graphic, we now see the more opaque the county, the better their Food Environment Index is, a Bureau of Health and Human Services index of grocery options. Additionally, we see the percentage of those deemed highly food insecure appear more blue. Wyoming County once more is among the most food insecure of all counties in Wyoming. The county is overwhelmingly white, at 97.3%, and unremarkable in its graduation rate and english proficiency among Wyoming Counties. 
-
 ```{r Plot 10, fig.align='center', message=FALSE, warning=FALSE}
 
 wv_stats <- aggregate(wv_df, by=list(wv_df$State, wv_df$County), FUN="mean", na.rm=TRUE)
-
-drops <- c("FIPS","Group.1", "Group.2", "State", "County")
+drops <- c("FIPS","cor_od_food", "Group.1", "Group.2", "State", "County")
 wv_stats <- wv_stats[ , !(names(wv_stats) %in% drops)]
 
 x <- wv_stats %>% 
@@ -494,7 +399,8 @@ x %>%
     geom_bar(stat = "identity") +
     labs(x="WEST VIRGINIA HEALTH STATISTIC",
          y="CORRELATION WITH OD MORTALITY RATE",
-         title="FOOD INSECURITY AND PREVENTABLE HOSPITAL VISITS\n ARE MOST ",
+         title="FOOD INSECURITY AND PREVENTABLE\nHOSPITAL VISITS ARE MOST TIED TO\nDRUG OD MORTALITY",
+         subtitle="High household incomes and education levels\nrender fewer drug-caused mortality",
          caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
     jtheme + jfill +
     theme(
@@ -506,24 +412,49 @@ x %>%
   coord_flip()
 ```
 
+### Looking Southwest
+Digging into the state where the opioid epidemic has run most rampant, the data clearly show a harrowing case particularly in the southwest of West Virginia. Wyoming County has the highest rate of drug overdoses resulting in death, and appears as the brightest pink in the southwest corridor. The below map plots not only the overdose mortality rate, but the highly correlated effect of the percent of the population who are food insecure, defined broadly by the USDA as "a socioeconomic condition of limited or uncertain access to enough food to support a healthy life". Unsurprisingly, the brighter red counties align with those counties where the overdose mortality rates soar, showing how all encompassing the opioid epidemic is; among the data there is a feedback loop of strongly correlated adverse outcomes (% unemployment, % food insecure, low levels of education, etc.) with high rates of opioid abuse.
+
+```{r Plot8, message=FALSE, warning=FALSE}
+ggplot(data = wv) +
+  geom_sf(aes(fill=cor_od_food, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05, show.legend = "fill") + 
+  labs(title="WEST VIRGINIA'S CONCENTRATED AREAS OF\nUNEMPLOYMENT ARE HIT HARDEST BY DRUG ABUSE",
+       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR",
+       fill="COUNTY LEVEL\nOD MORTALITY\nx FOOD INSECURITY") +
+  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's food insecurity\nand overdose death rates\nare highly correlated") +
+  annotate("text", x = -82.2, y=37.75, family="Quick", size=2.8, color="#ffffff", hjust=0, label="Wyoming County")+
+  annotate("text", x = -79.5, y=38.00, family="Consolas", size=2, color=text_color, hjust=0, label="no data indicated\nby grey fill")+
+  geom_point(aes(x=-81.5596, y=37.6), color="#ffffff") +
+  jtheme_nogrid + jfillc + jalpha +
+  theme(
+    plot.title = element_text(),
+    plot.margin=grid::unit(c(0,0,0,0), "mm")
+  )
+```
+
 ```{r Plot 11, fig.align='center', fig.height=10, message=FALSE, warning=FALSE}
 
-drops <- c("% African American", "% American Indian/Alaskan Native", "% Asian", "% Hispanic", "% Limited Access", "% Native Hawaiian/Other Pacific Islander",
-           "% Non-Hispanic White")
-wv_no_race <- wv_stats[ , !(names(wv_stats) %in% drops)]
-
+keeps <- c("Drug Overdose Mortality Rate", "% Food Insecure", "Preventable Hosp. Rate", "% Unemployed", "% Limited Access", "Graduation Rate", "Household Income")
+wv_no_race <- wv_stats[ , (names(wv_stats) %in% keeps)]
 
 wv_no_race %>%
   gather(-`Drug Overdose Mortality Rate`, key = "var", value = "value") %>% 
   ggplot(aes(x = value, y = `Drug Overdose Mortality Rate`)) +
-    facet_wrap(~ var, scales = "free", ncol=3) +
+    facet_wrap(~ var, scales = "free", ncol=2) +
+    stat_smooth(fill=AQUA, color=YELLOW) + 
     geom_point(color=RED) +
-    stat_smooth(fill=SKY, color=BLUE) + 
-  scale_x_continuous(limits=c(min(value), max(value)) +
+  labs(title="THE STATS MOST POSITIVELY AND NEGATIVELY\nCORRELATED WITH OD MORTALITY\nSHOW A SYSTEMIC FAILURE OF\nTHE SAFETY NET",
+       subtitle="Poor access to food, healthcare, education, and earnings\ncreate a vulnerable community to opioid addiction",
+       y="Drug Overdose Mortality Rate\n(Per 100K POPULATION)",
+       x="Statistic",
+       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR"
+       ) +
   jtheme +
   theme(
     strip.background=element_blank(),
-    strip.text=element_text(family="Quick", face="bold")
-  )
+    strip.text=element_text(family="Quick", face="bold", color=text_color)
+  ) 
 
 ```
+
+The top three most positively and negatively correlated statistics to overdose mortality rates offered by West Virginia's Department of Health and Human Services are hardly a surprise. Topping the list of positive correlation is food insecurity, where the worst faring county has more than 21% of its residents without consistent access to nourishment. Preventable hospital rates are also noteworthy in this data. There are a few key outliers in this data as shown above, where in extreme cases, 200 of 100,000 hospital visits are preventable. Most counties achieve between 80 and 90% graduation rates, though this remains one of the biggest correlations to overdose mortality. That said, Wyoming County, which leads the state in overdoses, has a fair graduation rate, with approximately 88% of its class graduating in 2018. In all, these charts paint a bleak picture, one where there is no silver bullet solution. Rather, inequity across education, healthcare access, and the ability to feed a family all create an environment where opioid addiction can thrive. 
