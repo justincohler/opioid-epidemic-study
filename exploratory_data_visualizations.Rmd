@@ -41,7 +41,6 @@ library(gifski)
 library(sf)
 library(directlabels)
 library(ggridges)
-install.packages("corrr")
 library(corrr)
 ```
 
@@ -67,8 +66,8 @@ MIDNIGHT <- "#0B132B"
 
 jpalette <- c(RED, BLUE, AQUA, LIGHT_GREEN, YELLOW,  ORANGE, BRIGHT_GREEN, WHITE, SKY, MIDNIGHT)
 jfill <- scale_fill_manual(values=jpalette)
-jfillc <- scale_fill_continuous(low=BLUE, high=RED)
-jfillc2 <- scale_fill_continuous(low=BRIGHT_GREEN, high=BLUE)
+jfillc <- scale_fill_continuous(low=BLUE, high=RED, na.value="#cfcfcf")
+jfillc2 <- scale_fill_continuous(low=BRIGHT_GREEN, high=BLUE, na.value="#cfcfcf")
 jalpha <- scale_alpha_continuous(range=c(.2,1))
 jcolor <- scale_colour_manual(values=jpalette) 
 jtheme <- theme_bw() + theme(
@@ -420,23 +419,20 @@ wv_shape <- st_read(here::here("data", "tl_2018_54_cousub.shp"))
 wv_shape$FIPS <- strtoi(paste(wv_shape$STATEFP, wv_shape$COUNTYFP, sep=''))
 
 wv_df <- read_csv(here::here("data", "west_virginia_county_data.csv"))
-
+wv_df$cor_od_food <- wv_df$`Drug Overdose Mortality Rate` * wv_df$`% Food Insecure`
+wv_df
 wv <- wv_shape %>% 
   left_join(wv_df, by = c("FIPS" = "FIPS"))
 wv$`OD DEATH RATE` <- wv$`Drug Overdose Mortality Rate`
 
 ggplot(data = wv) +
-  geom_sf(aes(fill=`OD DEATH RATE`, alpha=`% Unemployed`, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05) + 
+  geom_sf(aes(fill=cor_od_food, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05) + 
   labs(title="WEST VIRGINIA'S CONCENTRATED AREAS OF\nUNEMPLOYMENT ARE HIT HARDEST BY DRUG ABUSE",
        caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
   annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's unemployment rate\nand number of deaths\nby overdose are\nhighly correlated") +
   #geom_text(aes(label = ifelse(FIPS==54109, "Wyoming County", "")), stat="identity", vjust=-1)+
   #geom_label(data=subset(wv, FIPS==54109), aes(label="Wyoming County")) +
   jtheme_nogrid + jfillc + jalpha +
-  guides(
-   color = guide_colorbar(title="OD DEATH RATE"),
-   alpha = guide_legend(title="% UNEMPLOYED\n(OPACITY)")
- ) +
   theme(
     plot.title = element_text(),
     plot.margin=grid::unit(c(0,0,0,0), "mm")
@@ -461,3 +457,73 @@ ggplot(data = wv) +
   )
 ```
 In exploring food insecurity, the majority of those who are food insecure reside in counties where opioid abuse is prevalant. In the above graphic, we now see the more opaque the county, the better their Food Environment Index is, a Bureau of Health and Human Services index of grocery options. Additionally, we see the percentage of those deemed highly food insecure appear more blue. Wyoming County once more is among the most food insecure of all counties in Wyoming. The county is overwhelmingly white, at 97.3%, and unremarkable in its graduation rate and english proficiency among Wyoming Counties. 
+
+```{r Plot 10, fig.align='center', message=FALSE, warning=FALSE}
+
+wv_stats <- aggregate(wv_df, by=list(wv_df$State, wv_df$County), FUN="mean", na.rm=TRUE)
+
+drops <- c("FIPS","Group.1", "Group.2", "State", "County")
+wv_stats <- wv_stats[ , !(names(wv_stats) %in% drops)]
+
+x <- wv_stats %>% 
+  correlate() %>% 
+  focus(`Drug Overdose Mortality Rate`)
+x <- na.omit(x)
+
+#> # A tibble: 10 x 2
+#>    rowname        mpg
+#>      <chr>      <dbl>
+#> 1      cyl -0.8521620
+#> 2     disp -0.8475514
+#> 3       hp -0.7761684
+#> 4     drat  0.6811719
+#> 5       wt -0.8676594
+#> 6     qsec  0.4186840
+#> 7       vs  0.6640389
+#> 8       am  0.5998324
+#> 9     gear  0.4802848
+#> 10    carb -0.5509251
+
+x$posneg[x$`Drug Overdose Mortality Rate`>=0] <- RED
+x$posneg[x$`Drug Overdose Mortality Rate` < 0] <- AQUA
+
+
+x %>% 
+  mutate(rowname = factor(rowname, levels = rowname[order(`Drug Overdose Mortality Rate`)])) %>%  # Order by correlation strength
+  ggplot(aes(x = rowname, y = `Drug Overdose Mortality Rate`, fill=posneg)) +
+    geom_bar(stat = "identity") +
+    labs(x="WEST VIRGINIA HEALTH STATISTIC",
+         y="CORRELATION WITH OD MORTALITY RATE",
+         title="FOOD INSECURITY AND PREVENTABLE HOSPITAL VISITS\n ARE MOST ",
+         caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
+    jtheme + jfill +
+    theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_blank()
+    ) + 
+  guides(fill=FALSE) +
+  scale_fill_manual(values=c(RED,AQUA)) +
+  coord_flip()
+```
+
+```{r Plot 11, fig.align='center', fig.height=10, message=FALSE, warning=FALSE}
+
+drops <- c("% African American", "% American Indian/Alaskan Native", "% Asian", "% Hispanic", "% Limited Access", "% Native Hawaiian/Other Pacific Islander",
+           "% Non-Hispanic White")
+wv_no_race <- wv_stats[ , !(names(wv_stats) %in% drops)]
+
+
+wv_no_race %>%
+  gather(-`Drug Overdose Mortality Rate`, key = "var", value = "value") %>% 
+  ggplot(aes(x = value, y = `Drug Overdose Mortality Rate`)) +
+    facet_wrap(~ var, scales = "free", ncol=3) +
+    geom_point(color=RED) +
+    stat_smooth(fill=SKY, color=BLUE) + 
+  scale_x_continuous(limits=c(min(value), max(value)) +
+  jtheme +
+  theme(
+    strip.background=element_blank(),
+    strip.text=element_text(family="Quick", face="bold")
+  )
+
+```
