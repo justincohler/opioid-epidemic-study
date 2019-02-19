@@ -11,70 +11,35 @@ library(extrafont)
 library(devtools)
 library(scales)
 library(openintro)
-install.packages("fiftystater")
-
-library(installr)
-updateR()
-
-bg_color <- "#7A777A"
-text_color <- "#EEEEEE"
-grid_color <- "#BBBBBB"
-
-fonttable()
-fonts()
-
-loadfonts()
-
-jtheme <- theme_bw() + theme(
-  text = element_text(family="Quick", color = text_color),
-  
-  # Plot 
-  plot.background = element_rect(fill=bg_color),
-  plot.title = element_text(fontface="bold"),
-  
-  # Legend
-  legend.text = element_text("Consolas"),
-  legend.title = element_text(fontface="bold"),
-  legend.background = element_rect(fill=bg_color),
-  legend.key = element_rect(fill=bg_color),
-  
-  
-  # Axes
-  axis.line =  element_line(colour=grid_color),
-  axis.text = element_text(family="Consolas", colour=text_color),
-  axis.text.x.bottom = element_text(margin=margin(10, 10, 10, 10)),
-  axis.text.y.left = element_text(margin=margin(10, 10, 10, 10)),
-  
-  #axis.title = element_text(family="Quick"),
-  axis.line.x.bottom = element_blank(),
-  axis.line.y.left = element_blank(),
-  axis.ticks.x = element_line(colour=grid_color),
-  axis.ticks.y = element_line(colour=grid_color),
-  
-  # Panels
-  panel.background = element_rect(fill=bg_color),
-  panel.border = element_blank(),
-  panel.grid.major.x = element_line(colour=grid_color),
-  panel.grid.major.y = element_line(colour=grid_color),
-  panel.grid.minor.x = element_blank(),
-  panel.grid.minor.y = element_blank()
-)
+library(gganimate)
+library(gifski)
+library(gapminder)
+library(png)
 
 
-p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
-  geom_line() +
-  gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
-  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
-       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
-       caption="National Center for Health Statistics",
-       x="Date", y="% Fatal Drug Overdoses Per Capita") +
-  jtheme
+ggplot(mtcars, aes(factor(cyl), mpg)) + 
+  geom_boxplot() + 
+  # Here comes the gganimate code
+  transition_states(
+    gear,
+    transition_length = 2,
+    state_length = 1
+  ) +
+  enter_fade() + 
+  exit_shrink() +
+  ease_aes('sine-in-out')
 
-p1
 
-scale_color_manual(values=c("1"="#41B3A3", "2"="#E27D60", "3"="#C38D9E", "4"="#E8A87C", "5"="#85DCB"))
-scale_fill_manual(values=c("1"="#41B3A3", "2"="#E27D60", "3"="#C38D9E", "4"="#E8A87C", "5"="#85DCB"))
-
+ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, colour = country)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  scale_colour_manual(values = country_colors) +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  facet_wrap(~continent) +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', x = 'GDP per capita', y = 'life expectancy') +
+  transition_time(year) +
+  ease_aes('linear')
 
 fonts()
 
@@ -113,15 +78,6 @@ p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=
         panel.grid.minor.y = element_blank(),
         text=element_text(family="Lato"))
 
-p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`, group=`StateName`, colour=`StateName`)) +
-  geom_line() +
-  gghighlight(max_highlight = 8L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
-  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
-       subtitle = "Drug Overdoses Per Capita From the Previous 5 Years",
-       caption="National Center for Health Statistics",
-       x="Date", y="% Fatal Drug Overdoses Per Capita") +
-  jtheme
-
 p1
 ggsave(here::here("plots", "fatal_drug_ods.pdf"), plot=p1, device = cairo_pdf)
 
@@ -143,11 +99,11 @@ df_ods$Above <- df_ods$FatalitiesPerCap > mean_ods
 glimpse(df_ods)
 df_ods$Above[df_ods$Above == TRUE] <- "RED"
 df_ods$Above[df_ods$Above == FALSE] <- "GREEN"
-  
+
 
 p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap), y=FatalitiesPerCap, label=format(FatalitiesPerCap, digits=2, nsmall=2))) + 
-    geom_point(stat='identity', aes(col=Above), size=6)  +
-    scale_color_manual(name="Fatalities By Overdose (% of Pop)", 
+  geom_point(stat='identity', aes(col=Above), size=6)  +
+  scale_color_manual(name="Fatalities By Overdose (% of Pop)", 
                      labels = c("Below Average", "Above Average"), 
                      values = c("GREEN"="#00ba38", "RED"="#f8766d")) +
   geom_text(color="black", size=2) +
@@ -168,13 +124,12 @@ Plot
 DRUG_NAMES <- c("VICODIN", "OXYCODONE", "OXYCONTIN", "PERCOCET", 
                 "OPANA", "KADIAN", "AVINZA", "FENTANYL")
 
-df_util_2014 <- read_csv(here::here("data", "State_Drug_utilization_Data_2014.csv")) %>% filter(`Product Name` %in% DRUG_NAMES)
-df_util_2015 <- read_csv(here::here("data", "State_Drug_utilization_Data_2015.csv")) %>% filter(`Product Name` %in% DRUG_NAMES)
-df_util_2016 <- read_csv(here::here("data", "State_Drug_utilization_Data_2016.csv")) %>% filter(`Product Name` %in% DRUG_NAMES)
-df_util_2017 <- read_csv(here::here("data", "State_Drug_utilization_Data_2017.csv")) %>% filter(`Product Name` %in% DRUG_NAMES)
-df_util_2018 <- read_csv(here::here("data", "State_Drug_utilization_Data_2018.csv")) %>% filter(`Product Name` %in% DRUG_NAMES)
+fname_drug_utilization <- "State_Drug_Utilization_Data_"
+df_util <- read_csv(here::here("data", paste(fname_drug_utilization, "2008", ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)
+for (i in 2009:2018) {
+  df_util <- rbind(df_util, read_csv(here::here("data", paste(fname_drug_utilization, i, ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)) 
+}
 
-df_util <- rbind(df_util_2014, df_util_2015, df_util_2016, df_util_2017, df_util_2018)
 unique(df_util$`Product Name`)
 
 glimpse(df_util)
