@@ -24,7 +24,10 @@ const margin = {
     yaxis: 50,
     xaxis: 50
 };
-
+const legend = {
+    width: 100,
+    height: 75
+}
 const radius = 6;
 const width = 625 - margin.left - margin.right;
 const height = 625 - margin.top - margin.bottom;
@@ -37,14 +40,12 @@ const colors = {
 
 function ScatterPlot(data) {
 
-    let chart = this;
+    var chart = this;
 
     chart.svg = d3.select("#chart1")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-
-    chart.svg = d3.select("svg")
         .append("g")
 
     chart.xScale = d3.scaleLinear()
@@ -59,12 +60,6 @@ function ScatterPlot(data) {
     chart.xAxis = d3.axisTop(chart.xScale).ticks(5, "s");
     chart.yAxis = d3.axisRight(chart.yScale).ticks(5, "s");
 
-    // let legend = svg.append("g")
-    //     .attr("class", "legend")
-    //     .attr("transform", "translate(50,30)")
-    //     .style("font-size", "12px")
-    //     .call(d3.legend)
-
 };
 
 ScatterPlot.prototype.update = function (data) {
@@ -73,16 +68,7 @@ ScatterPlot.prototype.update = function (data) {
     chart.full = data.slice();
 
     chart.svg.selectAll("*").interrupt();
-
-    chart.svg.selectAll(".axisLabelMin").remove();
     chart.svg.selectAll(".circ").remove();
-    chart.svg.selectAll("path").remove();
-    chart.svg.selectAll(".annotation").remove();
-    chart.svg.selectAll("#followPoint").remove();
-
-    chart.svg
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
 
     chart.svg.append("g")
         .attr("transform", `translate(0, ${margin.top})`)
@@ -111,6 +97,22 @@ ScatterPlot.prototype.update = function (data) {
         .style("text-anchor", "middle")
         .html("Number of Prescriptions");
 
+    // verticalLegend = d3.svg.legend()
+    //     .labelFormat("none")
+    //     .cellPadding(5)
+    //     .orientation("vertical")
+    //     .units("Things in a List")
+    //     .cellWidth(25)
+    //     .cellHeight(18)
+    //     .inputScale(sampleOrdinal)
+    //     .cellStepping(10);
+
+    // chart.svg
+    //     .append("g")
+    //     .attr("transform", `translate(50,140)`)
+    //     .attr("class", "legend")
+    //     .call(verticalLegend);
+
     chart.svg.selectAll(".circ")
         .data(chart.full, (d) => d["Group.1"]).enter()
         .append("circle")
@@ -134,6 +136,7 @@ handleMouseover = function (d, i) {
         .transition()
         .duration(100)
         .attr("r", radius * 2);
+
 }
 handleMouseout = function (d, i) {
     d3.select(this)
