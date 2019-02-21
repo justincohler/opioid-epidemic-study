@@ -42,6 +42,7 @@ library(sf)
 library(directlabels)
 library(ggridges)
 library(corrr)
+library(jsonlite)
 ```
 
 ```{r THEME, echo=FALSE}
@@ -150,7 +151,7 @@ jtheme_nogrid <- theme_bw() + theme(
 palette_df <- data.frame("NAME"=c("A", "B", "C", "D", "E"), "VALUE"= c(1, 1, 1, 1, 1))
 separator <- palette_df %>% ggplot(aes(x=NAME, fill=NAME)) + geom_bar(width=1) + jtheme_nogrid + jfill + guides(fill=FALSE) 
 separator
-  ```
+```
 
 ```{r echo=FALSE, message=FALSE}
 # Pop Per State Data (source: https://www.census.gov/data/tables/2017/demo/popest/nation-total.html)
@@ -237,6 +238,10 @@ df_rxImportant <- df_rx %>% filter(`Drug Name` %in% c("OXYCODONE", "FENTANYL",  
 df_rxImportant <- df_rxImportant[order(df_rxImportant$`Number of Prescriptions`),]
 df_rxImportant$`Total Amount Reimbursed` <- df_rxImportant$`Total Amount Reimbursed`/1e6
 df_rxImportant$Date <- as.Date(as.character(df_rxImportant$Group.1), "%Y")
+
+df_json <- df_rxImportant %>% toJSON() 
+df_json
+write(df_json, here::here("data", "df_rx.json"))
 
 df_rxImportant %>% ggplot(aes(Date, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
   geom_point(alpha = 0.6) +
