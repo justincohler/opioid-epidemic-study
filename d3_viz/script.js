@@ -25,20 +25,21 @@ const margin = {
     xaxis: 50
 };
 
+const radius = 6;
 const width = 625 - margin.left - margin.right;
 const height = 625 - margin.top - margin.bottom;
 const colors = {
-    "KADIAN": "#ff0000",
-    "FENTANYL": "#ff00ff",
-    "OXYCODONE": "#ffff00",
-    "OXYCONTIN": "#00ffff"
+    "KADIAN": "#F9DC5c",    // YELLOW
+    "FENTANYL": "#56E39F",  // LIGHT GREEN
+    "OXYCODONE": "#0F7173", // AQUA
+    "OXYCONTIN": "#FC4445"  // RED
 };
 
 function ScatterPlot(data) {
 
     let chart = this;
 
-    chart.SVG = d3.select("#chart1")
+    chart.svg = d3.select("#chart1")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -47,17 +48,22 @@ function ScatterPlot(data) {
         .append("g")
 
     chart.xScale = d3.scaleLinear()
-        .domain([100000, 1000000])
+        .domain([0, 15000000])
         .range([width, 0])
         .nice();
 
     chart.yScale = d3.scaleLinear()
-        .domain([0, 500])
+        .domain([0, 600])
         .range([0, height]);
 
     chart.xAxis = d3.axisTop(chart.xScale).ticks(5, "s");
     chart.yAxis = d3.axisRight(chart.yScale).ticks(5, "s");
 
+    // let legend = svg.append("g")
+    //     .attr("class", "legend")
+    //     .attr("transform", "translate(50,30)")
+    //     .style("font-size", "12px")
+    //     .call(d3.legend)
 
 };
 
@@ -74,17 +80,17 @@ ScatterPlot.prototype.update = function (data) {
     chart.svg.selectAll(".annotation").remove();
     chart.svg.selectAll("#followPoint").remove();
 
-    chart.SVG
+    chart.svg
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
 
     chart.svg.append("g")
-        .attr("transform", () => `translate(0, ${margin.top})`)
+        .attr("transform", `translate(0, ${margin.top})`)
         .attr("class", "axis")
         .call(chart.xAxis);
 
     chart.svg.append("g")
-        .attr("transform", () => `translate(${width}, ${margin.top})`)
+        .attr("transform", `translate(${width}, ${margin.top})`)
         .attr("class", "axis")
         .call(chart.yAxis);
 
@@ -114,8 +120,24 @@ ScatterPlot.prototype.update = function (data) {
         .attr("cx", (d) => chart.xScale(d["Number of Prescriptions"]))
         .attr("cy", (d) => chart.yScale(d["Total Amount Reimbursed"]))
         .style("fill", (d) => colors[d["Drug Name"]])
+        .style("stroke", (d) => colors[d["Drug Name"]])
+        .on("mouseover", handleMouseover)
+        .on("mouseout", handleMouseout)
         .transition()
         .delay(function (d, i) { return (i * 50) })
         .duration(500)
-        .attr("r", 8);
+        .attr("r", radius);
 };
+
+handleMouseover = function (d, i) {
+    d3.select(this)
+        .transition()
+        .duration(100)
+        .attr("r", radius * 2);
+}
+handleMouseout = function (d, i) {
+    d3.select(this)
+        .transition()
+        .duration(500)
+        .attr("r", radius)
+}
