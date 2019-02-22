@@ -33,7 +33,7 @@ const width = 625 - margin.left - margin.right;
 const height = 625 - margin.top - margin.bottom;
 const colors = {
     "KADIAN": "#F9DC5c",    // YELLOW
-    "FENTANYL": "#56E39F",  // LIGHT GREEN
+    "FENTANYL": "#55BCC9",  // BLUE
     "OXYCODONE": "#0F7173", // AQUA
     "OXYCONTIN": "#FC4445"  // RED
 };

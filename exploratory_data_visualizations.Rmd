@@ -239,10 +239,6 @@ df_rxImportant <- df_rxImportant[order(df_rxImportant$`Number of Prescriptions`)
 df_rxImportant$`Total Amount Reimbursed` <- df_rxImportant$`Total Amount Reimbursed`/1e6
 df_rxImportant$Date <- as.Date(as.character(df_rxImportant$Group.1), "%Y")
 
-df_json <- df_rxImportant %>% toJSON() 
-df_json
-write(df_json, here::here("data", "df_rx.json"))
-
 df_rxImportant %>% ggplot(aes(Date, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
   geom_point(alpha = 0.6) +
   geom_line(size=0.1) + 

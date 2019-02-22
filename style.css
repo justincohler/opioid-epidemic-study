@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "Quick";
+  src: url(Quick.ttf);
+}
+
 body {
   font-family: "Georgia";
   background-color: #FFFFFF;
@@ -14,9 +19,9 @@ body .main-container {
 }
 
 .title {
-  font-family: 'Quick';
+  font-family: "Quick";
 }
 
 .author {
-  font-family: 'Consolas';
+  font-family: "Consolas";
 }
