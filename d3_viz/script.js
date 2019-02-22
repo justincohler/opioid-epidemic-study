@@ -25,10 +25,7 @@ const margin = {
     xaxis: 40,
     legendBox: 9
 };
-const legend = {
-    width: 100,
-    height: 75
-}
+
 const radius = 6;
 const width = 800 - margin.left - margin.right;
 const height = 550 - margin.top - margin.bottom;
@@ -117,7 +114,7 @@ function ScatterPlot(data) {
         .html("KADIAN")
 
     chart.xScale = d3.scaleLinear()
-        .domain([0, 12000000])
+        .domain([0, 10000000])
         .range([width, margin.left])
         .nice();
 
@@ -184,7 +181,7 @@ ScatterPlot.prototype.update = function (data) {
     chart.svg.selectAll(".circ")
         .data(chart.full, (d) => d["Group.1"]).enter()
         .append("circle")
-        .attr("transform", () => `translate(-${margin.right}, ${margin.top})`)
+        .attr("transform", () => `translate(0, ${margin.top})`)
         .attr("class", "circ")
         .attr("r", 0)
         .attr("cx", (d) => chart.xScale(d["Number of Prescriptions"]))
@@ -195,8 +192,8 @@ ScatterPlot.prototype.update = function (data) {
         .style("stroke", (d) => colors[d["Drug Name"]])
         .on("mouseover", function (d, i) {
 
-            let x = this.cx.baseVal.value - margin.left - 50;
-            let y = this.cy.baseVal.value + margin.top - 20;
+            let x = this.cx.baseVal.value - margin.left - 10;
+            let y = this.cy.baseVal.value + margin.top - 15;
             let xValue = this.getAttribute("xValue")
             let yValue = this.getAttribute("yValue")
             let id = `i${Math.trunc(xValue)}-${Math.trunc(yValue)}`;
