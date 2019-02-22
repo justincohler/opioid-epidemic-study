@@ -5,16 +5,7 @@ d3.queue()
 
         scatter = new ScatterPlot(results[0]);
         scatter.update(results[0]);
-
     });
-// d3.json('data/rx_data.json')
-//     .then(results => {
-//     scatter = new ScatterPlot(results[0]);
-//     scatter.update(results[0]);
-// }, err => {
-//     throw err;
-// })
-
 
 const margin = {
     left: 75,
@@ -161,22 +152,6 @@ ScatterPlot.prototype.update = function (data) {
         .attr("y", 0 + margin.top - margin.xaxis)
         .style("text-anchor", "middle")
         .html("Number of Prescriptions");
-
-    // verticalLegend = d3.svg.legend()
-    //     .labelFormat("none")
-    //     .cellPadding(5)
-    //     .orientation("vertical")
-    //     .units("Things in a List")
-    //     .cellWidth(25)
-    //     .cellHeight(18)
-    //     .inputScale(sampleOrdinal)
-    //     .cellStepping(10);
-
-    // chart.svg
-    //     .append("g")
-    //     .attr("transform", `translate(50,140)`)
-    //     .attr("class", "legend")
-    //     .call(verticalLegend);
 
     chart.svg.selectAll(".circ")
         .data(chart.full, (d) => d["Group.1"]).enter()
