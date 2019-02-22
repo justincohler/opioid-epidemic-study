@@ -19,18 +19,19 @@ d3.queue()
 const margin = {
     left: 75,
     right: 50,
-    top: 50,
+    top: 125,
     bottom: 75,
-    yaxis: 50,
-    xaxis: 50
+    yaxis: 150,
+    xaxis: 40,
+    legendBox: 9
 };
 const legend = {
     width: 100,
     height: 75
 }
 const radius = 6;
-const width = 625 - margin.left - margin.right;
-const height = 625 - margin.top - margin.bottom;
+const width = 800 - margin.left - margin.right;
+const height = 550 - margin.top - margin.bottom;
 const colors = {
     "KADIAN": "#F9DC5c",    // YELLOW
     "FENTANYL": "#55BCC9",  // BLUE
@@ -48,9 +49,76 @@ function ScatterPlot(data) {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
 
+    // Title
+    chart.svg
+        .append("text")
+        .attr("class", "title")
+        .attr("transform", `translate(50, 50)`)
+        .html("Oxycodone Appears to Most Closely Correlate Prescriptions to Reimbursements")
+
+    // Legend Line #1
+    chart.svg
+        .append("rect")
+        .attr("class", "legendBox")
+        .attr('x', margin.left)
+        .attr('y', margin.top + margin.xaxis)
+        .attr('fill', colors["OXYCODONE"]);
+
+    chart.svg
+        .append("text")
+        .attr("class", "legendText")
+        .attr("x", margin.left + 2 * margin.legendBox)
+        .attr("y", margin.top + margin.xaxis + margin.legendBox)
+        .html("OXYCODONE")
+
+    // Legend Line #2
+    chart.svg
+        .append("rect")
+        .attr("class", "legendBox")
+        .attr('x', margin.left)
+        .attr('y', margin.top + 1.5 * margin.xaxis)
+        .attr('fill', colors["OXYCONTIN"]);
+
+    chart.svg
+        .append("text")
+        .attr("class", "legendText")
+        .attr("x", margin.left + 2 * margin.legendBox)
+        .attr("y", margin.top + 1.5 * margin.xaxis + margin.legendBox)
+        .html("OXYCONTIN")
+
+    // Legend Line #3
+    chart.svg
+        .append("rect")
+        .attr("class", "legendBox")
+        .attr('x', margin.left)
+        .attr('y', margin.top + 2 * margin.xaxis)
+        .attr('fill', colors["FENTANYL"]);
+
+    chart.svg
+        .append("text")
+        .attr("class", "legendText")
+        .attr("x", margin.left + 2 * margin.legendBox)
+        .attr("y", margin.top + 2 * margin.xaxis + margin.legendBox)
+        .html("FENTANYL")
+
+    // Legend Line #4
+    chart.svg
+        .append("rect")
+        .attr("class", "legendBox")
+        .attr('x', margin.left)
+        .attr('y', margin.top + 2.5 * margin.xaxis)
+        .attr('fill', colors["KADIAN"]);
+
+    chart.svg
+        .append("text")
+        .attr("class", "legendText")
+        .attr("x", margin.left + 2 * margin.legendBox)
+        .attr("y", margin.top + 2.5 * margin.xaxis + margin.legendBox)
+        .html("KADIAN")
+
     chart.xScale = d3.scaleLinear()
-        .domain([0, 15000000])
-        .range([width, 0])
+        .domain([0, 12000000])
+        .range([width, margin.left])
         .nice();
 
     chart.yScale = d3.scaleLinear()
@@ -84,8 +152,8 @@ ScatterPlot.prototype.update = function (data) {
         .append("text")
         .attr("class", "yAxisLabel")
         .attr("transform", "rotate(-90)")
-        .attr("x", -(height / 2))
-        .attr("y", width + margin.right * 1.25)
+        .attr("x", -((height) / 2 + margin.yaxis))
+        .attr("y", width + margin.right)
         .style("text-anchor", "middle")
         .html("Total Amount Reimbursed ($ Millions)");
 
@@ -93,7 +161,7 @@ ScatterPlot.prototype.update = function (data) {
         .append("text")
         .attr("class", "xAxisLabel")
         .attr("x", width / 2)
-        .attr("y", 0 + margin.top * .5)
+        .attr("y", 0 + margin.top - margin.xaxis)
         .style("text-anchor", "middle")
         .html("Number of Prescriptions");
 
@@ -123,24 +191,40 @@ ScatterPlot.prototype.update = function (data) {
         .attr("cy", (d) => chart.yScale(d["Total Amount Reimbursed"]))
         .style("fill", (d) => colors[d["Drug Name"]])
         .style("stroke", (d) => colors[d["Drug Name"]])
-        .on("mouseover", handleMouseover)
-        .on("mouseout", handleMouseout)
+        .on("mouseover", function (d, i) {
+            let x = this.cx.baseVal.value - margin.left - 100;
+            let y = this.cy.baseVal.value + margin.top - 20;
+            let id = `i${Math.trunc(x)}-${Math.trunc(y)}`;
+
+            d3.select(this)
+                .transition()
+                .duration(100)
+                .attr("r", radius * 2);
+
+            chart.svg
+                .append("text")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("id", id)
+                .attr("class", "hoverLabel")
+                .html(`# of Prescriptions: ${Math.trunc(x)}, $ Reimbursed: ${Math.trunc(y)}`);
+        })
+        .on("mouseout", function (d, i) {
+            let x = this.cx.baseVal.value - margin.left - 100;
+            let y = this.cy.baseVal.value + margin.top - 20;
+            let id = `#i${Math.trunc(x)}-${Math.trunc(y)}`;
+
+            d3.select(this)
+                .transition()
+                .duration(500)
+                .attr("r", radius);
+
+            console.log(`Deleting ${id}`);
+            chart.svg.selectAll(id)
+                .remove();
+        })
         .transition()
         .delay(function (d, i) { return (i * 50) })
         .duration(500)
         .attr("r", radius);
 };
-
-handleMouseover = function (d, i) {
-    d3.select(this)
-        .transition()
-        .duration(100)
-        .attr("r", radius * 2);
-
-}
-handleMouseout = function (d, i) {
-    d3.select(this)
-        .transition()
-        .duration(500)
-        .attr("r", radius)
-}

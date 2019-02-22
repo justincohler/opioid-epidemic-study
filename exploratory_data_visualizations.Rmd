@@ -1,6 +1,6 @@
 ---
-title: "THE BROAD IMPACT OF OPIOID OVERDOSES ACROSS THE US"
-author: "Justin Cohler"
+title: "The Broad Impact of Opioid Overdoses Across the US"
+author: "JUSTIN COHLER"
 output: 
   html_document:
     code_folding: hide
@@ -46,10 +46,6 @@ library(jsonlite)
 ```
 
 ```{r THEME, echo=FALSE}
-#font_import()
-#fonts()
-
-#bg_color <- "#E8E9EB"
 bg_color <- "#FFFFFF"
 text_color <- "#444444"
 grid_color <- "#ECECEC"
@@ -165,30 +161,46 @@ In the previous five years, arguably no one has been hit harder by the opioid ep
 df_od <- read_csv(here::here("data", "VSRR_Provisional_Drug_Overdose_Death_Counts.csv"))
 df_od$Date <- parse_date_time(paste(tolower(df_od$Month), df_od$Year), orders=c("by"))
 df_od$NumDeaths <- df_od$`Data Value`
-df_od <- df_od %>% filter(`Indicator`=='Number of Deaths' & `State` != 'US' & State != 'YC')
-df_od <- df_od %>% left_join(., pop, by=c("State"="State"))
+df_od <- df_od %>% 
+  filter(`Indicator`=='Number of Deaths' 
+         & `State` != 'US' 
+         & State != 'YC')
+df_od <- df_od %>% 
+  left_join(., pop, by=c("State"="State"))
+
 df_od$FatalitiesPerCap <- df_od$`Data Value`/df_od$pop
 df_od <- df_od[order(df_od$FatalitiesPerCap),]
 
-p1 <- ggplot(df_od, aes(x=Date, y=`FatalitiesPerCap`*100, group=`StateName`, colour=`StateName`)) +
+df_od %>% 
+  ggplot(aes(x=Date, 
+                        y=`FatalitiesPerCap`*100, 
+                        group=`StateName`, 
+                        colour=`StateName`)) +
   geom_line() +
-  gghighlight(max_highlight = 5L, max(`FatalitiesPerCap`),  use_direct_label=FALSE, label_key=`FatalitiesPerCap`) +
-  labs(title="WEST VIRGINIA'S OPIOID PROBLEM STANDS \nIN STARK CONTRAST TO REST OF COUNTRY", 
+  gghighlight(max_highlight = 5L, 
+              max(`FatalitiesPerCap`),  
+              use_direct_label=FALSE, 
+              label_key=`FatalitiesPerCap`) +
+  labs(title="West Virginia's Opioid Problem Stands\nIn Stark Contrast to Rest of Country", 
        subtitle = "Drug Overdoses per Capita Over the Years",
-       caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
-       x="DATE", y="FATAL DRUG OVERDOSES (% OF POP)") +
-  guides(color=guide_legend(title="STATE", reverse=TRUE))+
+       caption="Source: National Center for Health Statistics",
+       x="Date", y="Fatal Drug Overdoses (% of Pop)") +
+  guides(color=guide_legend(title="STATE", 
+                            reverse=TRUE)) +
   jtheme + jcolor
 
-p1
 ```
 
 While West Virginia is most intensely affected among US states, no state is immune to the epidemic; even in New York, the state whose opioid-related death rate is lowest per capita, one half of one percent of the population will die from a drug-related overdose. The standard deviation of opioid abuse's impact on states is smaller than one might guess if they are only reading articles (https://www.nytimes.com/interactive/2018/us/west-virginia-opioids.html) about the plight of West Virginia. While West Virginia is without question an outlier as shown in the list below, no corner of the country is unaffected today.
 
 ```{r Plot2, fig.align='center', fig.height=8, message=FALSE, warning=FALSE}
-df_ods_by_state <- aggregate(df_od, by=list(df_od$StateName), FUN=mean, na.rm=TRUE)
+df_ods_by_state <- aggregate(df_od, 
+                             by=list(df_od$StateName), 
+                             FUN=mean, 
+                             na.rm=TRUE)
 df_ods_by_state$StateName <- df_ods_by_state$Group.1
-df_ods <- df_ods_by_state %>% select(StateName, FatalitiesPerCap)
+df_ods <- df_ods_by_state %>% 
+  select(StateName, FatalitiesPerCap)
 mean_ods <- mean(df_ods$FatalitiesPerCap)*100
 
 df_ods$Above <- df_ods$FatalitiesPerCap*100 > mean_ods
@@ -196,22 +208,29 @@ df_ods$Above <- df_ods$FatalitiesPerCap*100 > mean_ods
 df_ods$Above[df_ods$Above == TRUE] <- "ABOVE AVERAGE"
 df_ods$Above[df_ods$Above == FALSE] <- "BELOW AVERAGE"
 
-p2 <- ggplot(df_ods, aes(x=reorder(StateName, FatalitiesPerCap*100), y=FatalitiesPerCap*100)) + 
-  geom_point(stat='identity', aes(col=Above, label=format(FatalitiesPerCap, digits=2, nsmall=2)), size=4)  +
-  scale_color_manual(name="FATALITIES BY OVERDOSE (% OF POP)", 
-                     labels = c("ABOVE AVERAGE", "BELOW AVERAGE"), values=c(RED, AQUA)) +
-  labs(title="NEW YORK AND WEST VIRGINIA LIE ON OPPOSITE \nPOLES OF THE OPIOID EPIDEMIC", 
+df_ods %>% 
+  ggplot(aes(x=reorder(StateName, FatalitiesPerCap*100), 
+             y=FatalitiesPerCap*100)) + 
+  geom_point(stat='identity', 
+             aes(col=Above, 
+                 label=format(FatalitiesPerCap, 
+                              digits=2, 
+                              nsmall=2)), 
+             size=4)  +
+  scale_color_manual(name="Fatalities by Overdose (% of Pop)", 
+                     labels = c("ABOVE AVERAGE", "BELOW AVERAGE"), 
+                     values=c(RED, AQUA)) +
+  labs(title="New York and West Virginia Lie on Opposite\nOf the Opioid Epidemic", 
        subtitle="Fatal Drug Overdoses by State",
-       caption="SOURCE: NATIONAL CENTER FOR HEALTH STATISTICS",
-       x="STATE", y="FATALITIES PER CAPITA (% OF POP)") +
+       caption="Source: National Center for Health Statistics",
+       x="State", y="Fatalities per Capita (% of Pop)") +
   ylim(0.4, 1.4) +
   jtheme +
-  guides(color=guide_legend(title="OD MORTALITY RATE", reverse=TRUE))+
+  guides(color=guide_legend(title="OD Mortality Rate", 
+                            reverse=TRUE))+
   theme(
      panel.grid.major.x = element_blank()
   ) + coord_flip() 
-
-p2
 ```
 2015 was a clear reckoning for the US Government's reimbursement of presciption opioids, those contributing most towards the opioid epidemic. The data below shows the prescriptions in cicle size over time, along with the total amount reimbursed, thanks to Medicaid data. While one might anticipate that as less and less reimbusement money is available for prescription opioids, doctors would prescribe fewer pills. Though we do see slightly larger circles as reimbursements go up, it seems that prescriptions aren't very responsive to drug reimbursement. This relationship may show different results in comparing reimbursement to the number of filled prescriptions at the pharmacy.  
 
@@ -221,40 +240,51 @@ DRUG_NAMES <- c("VICODIN", "OXYCODONE", "OXYCONTIN", "PERCOCET",
 
 fname_drug_utilization <- "State_Drug_Utilization_Data_"
 
-# First time processing of DataFrame
+##
+## First time processing of DataFrame
+##
 #df_util <- read_csv(here::here("data", paste(fname_drug_utilization, "2008", ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)
 #for (i in 2009:2018) {
 #  df_util <- rbind(df_util, read_csv(here::here("data", paste(fname_drug_utilization, i, ".csv", sep=""))) %>% filter(`Product Name` %in% DRUG_NAMES)) 
 #}
-
 #readr::write_csv(df_util, here::here("data", "df_util.csv"))
+
 df_util <- read_csv(here::here("data", "df_util.csv"))
 ```
 
 ```{r Plot3, fig.align='center', fig.height=6, message=FALSE, warning=FALSE}
-df_rx <- aggregate(df_util[,c("Number of Prescriptions", "Total Amount Reimbursed")], by=list(df_util$Year, df_util$`Product Name`), FUN="sum", na.rm=TRUE)
+df_rx <- aggregate(df_util[,c("Number of Prescriptions", "Total Amount Reimbursed")], 
+                   by=list(df_util$Year, df_util$`Product Name`), 
+                   FUN="sum", 
+                   na.rm=TRUE)
 df_rx$`Drug Name` <- df_rx$Group.2
-df_rxImportant <- df_rx %>% filter(`Drug Name` %in% c("OXYCODONE", "FENTANYL",  "KADIAN", "OXYCONTIN")) 
+df_rxImportant <- df_rx %>% 
+  filter(`Drug Name` %in% c("OXYCODONE", 
+                            "FENTANYL",  
+                            "KADIAN", 
+                            "OXYCONTIN")) 
 df_rxImportant <- df_rxImportant[order(df_rxImportant$`Number of Prescriptions`),]
 df_rxImportant$`Total Amount Reimbursed` <- df_rxImportant$`Total Amount Reimbursed`/1e6
 df_rxImportant$Date <- as.Date(as.character(df_rxImportant$Group.1), "%Y")
 
-df_rxImportant %>% ggplot(aes(Date, `Total Amount Reimbursed`, size=`Number of Prescriptions`, colour=`Drug Name`)) +
+df_rxImportant %>% 
+  ggplot(aes(Date, 
+             `Total Amount Reimbursed`, 
+             size=`Number of Prescriptions`, 
+             colour=`Drug Name`)) +
   geom_point(alpha = 0.6) +
   geom_line(size=0.1) + 
   scale_y_continuous(labels = dollar) +
-  labs(title = "PAINKILLER REIMBURSEMENTS SHRINK WHILE \nPRESCRIPTIONS REMAIN FAIRLY CONSTANT",
+  labs(title = "Painkiller Reimbursements Shrink While\nPrescriptions Remain Fairly Constant",
        subtitle = "Expense Reimbursement & Prescriptions Over Time\n\n",
-       caption = "SOURCE: DATA.MEDICAID.GOV",
-       x = 'YEAR', y = 'TOTAL REIMBURSED (MILLIONS USD)',
-       size="NUMBER OF PRESCRIPTIONS",
-       colour="DRUG NAME") +
+       caption = "Source: Data.Medicaid.Gov",
+       x = 'Year', 
+       y = 'Total Reimbursed (Millions USD)',
+       size="Number of Prescriptions",
+       colour="Drug Name") +
   jtheme + 
   scale_colour_manual(values=c(BLUE, LIGHT_GREEN, AQUA, RED)) +
   guides(color=guide_legend(reverse=TRUE)) 
-
-
-
 ```
 
 Middle America in 2018 saw the worst of opioid related drug overdoses. Middle America's plight with drugs likely has to do with smuggling routes, with major hubs in cities like Chicago. The rural west appears to be relatively minimally affected, with states along the Sierra Nevadas showing low rates of overdose deaths. In the Northeast, results are mixed, with coastal mid-atlantic states faring much better than the rural border states like New Hampshire. While New York is a clear outlier in its resistance to the epidemic, Utah is also comparitively well off due to the relatively high Mormon population in the state.
@@ -263,84 +293,127 @@ Middle America in 2018 saw the worst of opioid related drug overdoses. Middle Am
 df_util$StateName <- abbr2state(df_util$State)
 
 # Drug Overdoses
-DATA_OVERDOSE <- "VSRR_Provisional_Drug_Overdose_Death_Counts.csv"
-df_od <- read_csv(here::here("data", DATA_OVERDOSE))
+df_od <- read_csv(here::here("data", "VSRR_Provisional_Drug_Overdose_Death_Counts.csv"))
 df_od$Date <- parse_date_time(paste(tolower(df_od$Month), df_od$Year), orders=c("by"))
 df_od$NumDeaths <- df_od$`Data Value`
-df_od <- df_od %>% filter(`Indicator`=='Number of Deaths' & `State` != 'US')
-df_od_pop <- df_od %>% left_join(., pop, by=c("State"="State"))
+df_od <- df_od %>% 
+  filter(`Indicator`=='Number of Deaths' 
+         & `State` != 'US')
+df_od_pop <- df_od %>% 
+  left_join(., pop, by=c("State"="State"))
 
 df_od_pop$FatalitiesPer <- df_od_pop$`Data Value`/df_od_pop$pop
 
 yr=2018
 
 df_od_pop <- df_od_pop %>% filter(Year == yr)
-
-df_od_pop <- aggregate(list(FatalitiesPer=df_od_pop$FatalitiesPer), by=list(StateName=df_od_pop$StateName), FUN="sum", na.rm=TRUE)
+df_od_pop <- aggregate(list(FatalitiesPer=df_od_pop$FatalitiesPer), 
+                       by=list(StateName=df_od_pop$StateName), 
+                       FUN="sum", 
+                       na.rm=TRUE)
 
 # Import Cartogram Polygons, merge drug overdose data
-spdf <- geojson_read(here::here("data", "us_states_hexgrid.geojson"),  what = "sp")
-spdf@data = spdf@data %>% mutate(google_name = gsub(" \\(United States\\)", "", google_name)) 
-spdf@data = spdf@data %>% left_join(., df_od_pop, by=c("google_name"="StateName"))
+spdf <- geojson_read(here::here("data", "us_states_hexgrid.geojson"),  
+                     what = "sp")
+spdf@data = spdf@data %>% 
+  mutate(google_name = gsub(" \\(United States\\)", "", google_name)) 
+spdf@data = spdf@data %>% 
+  left_join(., 
+            df_od_pop, 
+            by=c("google_name"="StateName"))
 cartogram <- cartogram_cont(spdf, 'FatalitiesPer')
 
-carto_fortified <- tidy(cartogram, region = "google_name") %>% left_join(. , cartogram@data, by=c("id"="google_name")) 
+carto_fortified <- tidy(cartogram, region = "google_name") %>% 
+  left_join(. , cartogram@data, by=c("id"="google_name")) 
 centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=cartogram@data$iso3166_2))   
 
-p_green <- ggplot() +
-    geom_polygon(data = carto_fortified, aes(fill = FatalitiesPer, x = long, y = lat, group = group) , size=0.05, alpha=0.9, color=text_color) +
-    scale_fill_gradient(low=AQUA, high=RED, name="OPIOID RELATED DEATHS\nPER CAPITA", guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
-    geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#ffffff", size=3, alpha=1.0) +
-    labs( title=paste("WHERE OVERDOSE DEATHS HIT HARDEST: ",yr),
-          subtitle="Cartogram of Opioid Related Deaths Across the US",
-          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") + 
-    coord_map() +
-    jtheme_nogrid +
-    theme(
-        plot.background = element_rect(fill=bg_color, color = NA),
-        panel.background =  element_rect(fill=bg_color, color = NA),
-        strip.background =  element_rect(fill=bg_color, color = NA),
-        strip.background.x =  element_rect(fill=bg_color, color = NA),
-        strip.background.y =  element_rect(fill=bg_color, color = NA),
-        legend.background = element_rect(fill=bg_color, color=NA),
-        legend.box.background = element_rect(fill=bg_color, color=NA),
-        plot.margin = margin(53,0,53,0,"pt")
-    ) 
-
-p_green
+carto_fortified %>%
+  ggplot() +
+  geom_polygon(aes(fill = FatalitiesPer, 
+                   x = long, 
+                   y = lat, 
+                   group = group) , 
+              size=0.05, 
+              alpha=0.9, 
+              color=text_color) +
+  scale_fill_gradient(low=AQUA, 
+                      high=RED, 
+                      name="Oppioid Related Deaths\nPer Capita", 
+                      guide=guide_legend( keyheight = unit(3, units = "mm"), 
+                                          keywidth=unit(15, units = "mm"), 
+                                          title.position = 'top', 
+                                          label.position = "bottom") ) +
+  geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#ffffff", size=3, alpha=1.0) +
+  labs( title=paste("Where Overdose Deaths Hit Hardest: ",yr),
+        subtitle="Cartogram of Opioid Related Deaths Across the US",
+        caption="Source: VSSR, Data.Medicaid.Gov") + 
+  coord_map() +
+  jtheme_nogrid +
+  theme(
+      plot.background = element_rect(fill=bg_color, color = NA),
+      panel.background =  element_rect(fill=bg_color, color = NA),
+      strip.background =  element_rect(fill=bg_color, color = NA),
+      strip.background.x =  element_rect(fill=bg_color, color = NA),
+      strip.background.y =  element_rect(fill=bg_color, color = NA),
+      legend.background = element_rect(fill=bg_color, color=NA),
+      legend.box.background = element_rect(fill=bg_color, color=NA),
+      plot.margin = margin(53,0,53,0,"pt")
+  ) 
 ```
 Correlation to states with high prescription rates doesn't tell much of a story when comparing cartograms. Maryland had by far the most opioid prescriptions doled out in 2018, followed by a cluster of states in the Southwest, omitting Utah, whose large Mormon population dampens its statistics related to drug utilization. There doesn't appear to be a relationship within given years between opioid prescription and abuse within states. This could hint at a black market, or at the notion that most people's opioid sourcing does not originate from hospitals or pharmacies.
 
 
 ```{r Plot5, fig.align='center', message=FALSE, warning=FALSE}
-df_util_pop <- df_util %>% left_join(., pop, by=c("State"="State"))
+df_util_pop <- df_util %>% 
+  left_join(., pop, by=c("State"="State"))
 
 df_util_pop$NumRxPer <- df_util_pop$`Number of Prescriptions`/df_util_pop$pop
 df_util_pop$StateName <- df_util_pop$StateName.x
 yr=2018
 
-df_util_pop <- df_util_pop %>% filter(Year == yr)
-df_util_pop <- aggregate(list(NumRxPer=df_util_pop$NumRxPer), by=list(StateName=df_util_pop$StateName), FUN="sum", na.rm=TRUE)
+df_util_pop <- df_util_pop %>% 
+  filter(Year == yr)
+df_util_pop <- aggregate(list(NumRxPer=df_util_pop$NumRxPer), 
+                         by=list(StateName=df_util_pop$StateName), 
+                         FUN="sum", 
+                         na.rm=TRUE)
 
 # Import Cartogram Polygons, merge drug overdose data
 spdf <- geojson_read(here::here("data", "us_states_hexgrid.geojson"),  what = "sp")
-spdf@data = spdf@data %>% mutate(google_name = gsub(" \\(United States\\)", "", google_name)) 
-spdf@data = spdf@data %>% left_join(., df_util_pop, by=c("google_name"="StateName"))
+spdf@data = spdf@data %>% 
+  mutate(google_name = gsub(" \\(United States\\)", "", google_name)) 
+spdf@data = spdf@data %>% 
+  left_join(., df_util_pop, by=c("google_name"="StateName"))
 cartogram <- cartogram_cont(spdf, 'NumRxPer')
 
-carto_fortified <- tidy(cartogram, region = "google_name") %>% left_join(. , cartogram@data, by=c("id"="google_name")) 
+carto_fortified <- tidy(cartogram, region = "google_name") %>% 
+  left_join(. , cartogram@data, by=c("id"="google_name")) 
 centers <- cbind.data.frame(data.frame(gCentroid(cartogram, byid=TRUE), id=cartogram@data$iso3166_2))   
 
-p_blue <- ggplot() +
-    geom_polygon(data = carto_fortified, 
-                 aes(fill = NumRxPer, x = long, y = lat, group = group) , 
-                 size=0.05, alpha=0.9, color=text_color) +
-    scale_fill_gradient(low=AQUA, high=RED, name="PRESCRIPTIONS PER CAPITA", 
-                         guide=guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(15, units = "mm"), title.position = 'top', label.position = "bottom") ) +
-    geom_text(family="Quick", data=centers, aes(x=x, y=y, label=id), color="#ffffff", size=2, alpha=1.0) +
-    labs( title=paste("WHERE DRUGS LEAVE THE HOSPITAL: ",yr),
+carto_fortified %>%  ggplot() +
+    geom_polygon(aes(fill = NumRxPer, 
+                     x = long, 
+                     y = lat, 
+                     group = group) , 
+                 size=0.05, 
+                 alpha=0.9, 
+                 color=text_color) +
+    scale_fill_gradient(low=AQUA, 
+                        high=RED, 
+                        name="Prescriptions per Capita", 
+                         guide=guide_legend( keyheight = unit(3, units = "mm"), 
+                                             keywidth=unit(15, units = "mm"), 
+                                             title.position = 'top', 
+                                             label.position = "bottom") ) +
+    geom_text(family="Quick", 
+              data=centers, 
+              aes(x=x, y=y, label=id), 
+              color="#ffffff", 
+              size=2, 
+              alpha=1.0) +
+    labs( title=paste("Where Drugs Leave the Hospital: ",yr),
           subtitle="Cartogram of Key Opioid Prescription Rates Across US the US",
-          caption="SOURCE: VSSR, DATA.MEDICAID.GOV") +
+          caption="Source: VSSR, Data.Medicaid.GovDATA.MEDICAID.GOV") +
     coord_map()  +
     jtheme_nogrid +
     theme(
@@ -353,9 +426,6 @@ p_blue <- ggplot() +
         legend.box.background = element_rect(fill=bg_color, color=NA),
         plot.margin = margin(46,0,47,0,"pt")
     ) 
-
-p_blue
-
 ```
 
 In the West Virginia Department of Health and Human Resources' 2018 report, each county provided demographic and various quality of health and life data. The  cross-section below correlates various features of the West Virginia population with its overdose mortality rate in 2018. Topping the charts for positive correlation are poor access to food, and preventable hospital visits, while counties with poor graduation rates and household incomes also correlate with overdose mortality heavily.  
@@ -370,9 +440,12 @@ wv <- wv_shape %>%
   left_join(wv_df, by = c("FIPS" = "FIPS"))
 wv$`OD DEATH RATE` <- wv$`Drug Overdose Mortality Rate`
 ```
-```{r Plot 10, fig.align='center', message=FALSE, warning=FALSE}
 
-wv_stats <- aggregate(wv_df, by=list(wv_df$State, wv_df$County), FUN="mean", na.rm=TRUE)
+```{r Plot6, fig.align='center', message=FALSE, warning=FALSE}
+wv_stats <- aggregate(wv_df, 
+                      by=list(wv_df$State, wv_df$County), 
+                      FUN="mean", 
+                      na.rm=TRUE)
 drops <- c("FIPS","cor_od_food", "Group.1", "Group.2", "State", "County")
 wv_stats <- wv_stats[ , !(names(wv_stats) %in% drops)]
 
@@ -380,34 +453,22 @@ x <- wv_stats %>%
   correlate() %>% 
   focus(`Drug Overdose Mortality Rate`)
 x <- na.omit(x)
-
-#> # A tibble: 10 x 2
-#>    rowname        mpg
-#>      <chr>      <dbl>
-#> 1      cyl -0.8521620
-#> 2     disp -0.8475514
-#> 3       hp -0.7761684
-#> 4     drat  0.6811719
-#> 5       wt -0.8676594
-#> 6     qsec  0.4186840
-#> 7       vs  0.6640389
-#> 8       am  0.5998324
-#> 9     gear  0.4802848
-#> 10    carb -0.5509251
-
 x$posneg[x$`Drug Overdose Mortality Rate`>=0] <- RED
 x$posneg[x$`Drug Overdose Mortality Rate` < 0] <- AQUA
 
 
 x %>% 
-  mutate(rowname = factor(rowname, levels = rowname[order(`Drug Overdose Mortality Rate`)])) %>%  # Order by correlation strength
-  ggplot(aes(x = rowname, y = `Drug Overdose Mortality Rate`, fill=posneg)) +
+  mutate(rowname = factor(rowname, 
+                          levels = rowname[order(`Drug Overdose Mortality Rate`)])) %>%  
+  ggplot(aes(x = rowname, 
+             y = `Drug Overdose Mortality Rate`, 
+             fill=posneg)) +
     geom_bar(stat = "identity") +
-    labs(x="WEST VIRGINIA HEALTH STATISTIC",
-         y="CORRELATION WITH OD MORTALITY RATE",
-         title="FOOD INSECURITY AND PREVENTABLE\nHOSPITAL VISITS ARE MOST TIED TO\nDRUG OD MORTALITY",
+    labs(x="West Virginia Health Statistic",
+         y="Correlation with OD Mortality Rate",
+         title="Food Insecurity and Preventable\nHospital Visits are Most Tied to\nDrug OD Mortality",
          subtitle="High household incomes and education levels\nrender fewer drug-caused mortality",
-         caption="SOURCE: WEST VIRGINIA DEPT. OF HHR") +
+         caption="Source: West Virginia Dept. of HHR") +
     jtheme + jfill +
     theme(
       panel.grid.major.x = element_blank(),
@@ -422,16 +483,40 @@ x %>%
 
 Digging into the state where the opioid epidemic has run most rampant, the data clearly show a harrowing case particularly in the southwest of West Virginia. Wyoming County has the highest rate of drug overdoses resulting in death, and appears as the brightest pink in the southwest corridor. The below map plots not only the overdose mortality rate, but the highly correlated effect of the percent of the population who are food insecure, defined broadly by the USDA as "a socioeconomic condition of limited or uncertain access to enough food to support a healthy life". Unsurprisingly, the brighter red counties align with those counties where the overdose mortality rates soar, showing how all encompassing the opioid epidemic is; among the data there is a feedback loop of strongly correlated adverse outcomes (% unemployment, % food insecure, low levels of education, etc.) with high rates of opioid abuse.
 
-```{r Plot8, message=FALSE, warning=FALSE}
+```{r Plot7, message=FALSE, warning=FALSE}
 ggplot(data = wv) +
-  geom_sf(aes(fill=cor_od_food, label=ifelse(FIPS > 54108 & FIPS < 54110, "Wyoming County", NA)), size=0.05, show.legend = "fill") + 
-  labs(title="WEST VIRGINIA'S CONCENTRATED AREAS OF\nUNEMPLOYMENT ARE HIT HARDEST BY DRUG ABUSE",
-       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR",
-       fill="COUNTY LEVEL\nOD MORTALITY\nx FOOD INSECURITY") +
-  annotate("text", x = -80.2, y = 40.3, family="Consolas", color=text_color, hjust = 0, label = "2018's food insecurity\nand overdose death rates\nare highly correlated") +
-  annotate("text", x = -82.2, y=37.75, family="Quick", size=2.8, color="#ffffff", hjust=0, label="Wyoming County")+
-  annotate("text", x = -79.5, y=38.00, family="Consolas", size=2, color=text_color, hjust=0, label="no data indicated\nby grey fill")+
-  geom_point(aes(x=-81.5596, y=37.6), color="#ffffff") +
+  geom_sf(aes(fill=cor_od_food), 
+          size=0.05, 
+          show.legend = "fill") + 
+  labs(title="West Virginia's Concentrated Areas of\nUnemployment are Hit Hardest by Drug Abuse",
+       caption="Source: West Virginia Dept. of HHR",
+       fill="County Level\nOD Mortality\nxFood Insecurity") +
+  annotate("text", 
+           x = -80.2, 
+           y = 40.3, 
+           family="Consolas", 
+           color=text_color, 
+           hjust = 0, 
+           label = "2018's food insecurity\nand overdose death rates\nare highly correlated") +
+  annotate("text", 
+           x = -82.2, 
+           y=37.75, 
+           family="Quick", 
+           size=2.8, 
+           color="#ffffff", 
+           hjust=0, 
+           label="Wyoming County")+
+  annotate("text", 
+           x = -79.5, 
+           y=38.00, 
+           family="Consolas", 
+           size=2, 
+           color=text_color, 
+           hjust=0, 
+           label="no data indicated\nby grey fill")+
+  geom_point(aes(x=-81.5596, 
+                 y=37.6), 
+             color="#ffffff") +
   jtheme_nogrid + jfillc + jalpha +
   theme(
     plot.title = element_text(),
@@ -439,27 +524,41 @@ ggplot(data = wv) +
   )
 ```
 
-```{r Plot 11, fig.align='center', fig.height=10, message=FALSE, warning=FALSE}
+```{r Plot8, fig.align='center', fig.height=10, message=FALSE, warning=FALSE}
 
-keeps <- c("Drug Overdose Mortality Rate", "% Food Insecure", "Preventable Hosp. Rate", "% Unemployed", "% Limited Access", "Graduation Rate", "Household Income")
+keeps <- c("Drug Overdose Mortality Rate", 
+           "% Food Insecure", 
+           "Preventable Hosp. Rate", 
+           "% Unemployed", 
+           "% Limited Access", 
+           "Graduation Rate", 
+           "Household Income")
+
 wv_no_race <- wv_stats[ , (names(wv_stats) %in% keeps)]
 
 wv_no_race %>%
-  gather(-`Drug Overdose Mortality Rate`, key = "var", value = "value") %>% 
-  ggplot(aes(x = value, y = `Drug Overdose Mortality Rate`)) +
-    facet_wrap(~ var, scales = "free", ncol=2) +
+  gather(-`Drug Overdose Mortality Rate`, 
+         key = "var", 
+         value = "value") %>% 
+  ggplot(aes(x = value, 
+             y = `Drug Overdose Mortality Rate`)) +
+    facet_wrap(~ var, 
+               scales = "free", 
+               ncol=2) +
     stat_smooth(fill=AQUA, color=YELLOW) + 
     geom_point(color=RED) +
-  labs(title="THE STATS MOST POSITIVELY AND NEGATIVELY\nCORRELATED WITH OD MORTALITY\nSHOW A SYSTEMIC FAILURE OF\nTHE SAFETY NET",
+  labs(title="The Stats Most Positively and Negatively\nCorrelated with OD Mortality\nShow a Systemic Failure of\nThe Safety Net",
        subtitle="Poor access to food, healthcare, education, and earnings\ncreate a vulnerable community to opioid addiction",
        y="Drug Overdose Mortality Rate\n(Per 100K POPULATION)",
        x="Statistic",
-       caption="SOURCE: WEST VIRGINIA DEPT. OF HHR"
+       caption="Soure: West Virginia Dept. of HHR"
        ) +
   jtheme +
   theme(
     strip.background=element_blank(),
-    strip.text=element_text(family="Quick", face="bold", color=text_color)
+    strip.text=element_text(family="Quick", 
+                            face="bold", 
+                            color=text_color)
   ) 
 
 ```
