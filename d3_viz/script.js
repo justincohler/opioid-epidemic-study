@@ -189,30 +189,46 @@ ScatterPlot.prototype.update = function (data) {
         .attr("r", 0)
         .attr("cx", (d) => chart.xScale(d["Number of Prescriptions"]))
         .attr("cy", (d) => chart.yScale(d["Total Amount Reimbursed"]))
+        .attr("xValue", (d) => d["Number of Prescriptions"])
+        .attr("yValue", (d) => d["Total Amount Reimbursed"])
         .style("fill", (d) => colors[d["Drug Name"]])
         .style("stroke", (d) => colors[d["Drug Name"]])
         .on("mouseover", function (d, i) {
-            let x = this.cx.baseVal.value - margin.left - 100;
-            let y = this.cy.baseVal.value + margin.top - 20;
-            let id = `i${Math.trunc(x)}-${Math.trunc(y)}`;
 
+            let x = this.cx.baseVal.value - margin.left - 50;
+            let y = this.cy.baseVal.value + margin.top - 20;
+            let xValue = this.getAttribute("xValue")
+            let yValue = this.getAttribute("yValue")
+            let id = `i${Math.trunc(xValue)}-${Math.trunc(yValue)}`;
+
+            // Bump up circle size
             d3.select(this)
                 .transition()
                 .duration(100)
                 .attr("r", radius * 2);
 
+            // Hover Tooltips
+            chart.svg
+                .append("text")
+                .attr("x", x)
+                .attr("y", y - 8)
+                .attr("id", `${id}-Prescriptions`)
+                .attr("class", "hoverLabel")
+                .html(`# Prescriptions: ${Number(xValue).toLocaleString()}`);
+
             chart.svg
                 .append("text")
                 .attr("x", x)
                 .attr("y", y)
-                .attr("id", id)
+                .attr("id", `${id}-Reimbursements`)
                 .attr("class", "hoverLabel")
-                .html(`# of Prescriptions: ${Math.trunc(x)}, $ Reimbursed: ${Math.trunc(y)}`);
+                .html(`$ Reimbursed: ${Math.trunc(Number(yValue)).toLocaleString()}M`);
         })
         .on("mouseout", function (d, i) {
-            let x = this.cx.baseVal.value - margin.left - 100;
-            let y = this.cy.baseVal.value + margin.top - 20;
-            let id = `#i${Math.trunc(x)}-${Math.trunc(y)}`;
+            let xValue = this.getAttribute("xValue")
+            let yValue = this.getAttribute("yValue")
+            let id = `i${Math.trunc(xValue)}-${Math.trunc(yValue)}`;
+
 
             d3.select(this)
                 .transition()
@@ -220,7 +236,9 @@ ScatterPlot.prototype.update = function (data) {
                 .attr("r", radius);
 
             console.log(`Deleting ${id}`);
-            chart.svg.selectAll(id)
+            chart.svg.selectAll(`#${id}-Prescriptions`)
+                .remove();
+            chart.svg.selectAll(`#${id}-Reimbursements`)
                 .remove();
         })
         .transition()
