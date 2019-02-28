@@ -29,6 +29,11 @@ text {
     border-radius: 10px;
 }
 
+.source {
+    font-family: Quick;
+    font-size: 10px;
+}
+
 #maincontent {
     padding-top: 65px;
 }
@@ -61,4 +66,10 @@ text {
 .legend rect {
     fill:white;
     stroke:#444;
-    opacity:0.8;}
+    opacity:0.8;
+}
+
+@font-face {
+    font-family: Quick;
+    src: url(Quick.ttf);
+}

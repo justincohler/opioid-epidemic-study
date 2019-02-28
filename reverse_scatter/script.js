@@ -1,3 +1,10 @@
+/**
+ * The format of this initial d3 v4 ScatterPlot utilized the following
+ * repository for reference. Style structure in style.css also utilized
+ * reference styles in:
+ * 
+ * https://github.com/alexcengler/tanf-exploration
+ */
 d3.queue()
     .defer(d3.json, 'data/rx_data.json')
     .awaitAll(function (error, results) {
@@ -102,7 +109,15 @@ function ScatterPlot(data) {
         .attr("class", "legendText")
         .attr("x", margin.left + 2 * margin.legendBox)
         .attr("y", margin.top + 2.5 * margin.xaxis + margin.legendBox)
-        .html("KADIAN")
+        .html("KADIAN");
+
+    // SOURCE
+    chart.svg
+        .append("text")
+        .attr("class", "source")
+        .attr("x", width - 3 * margin.left)
+        .attr("y", margin.top + height)
+        .html("Source: Data.Medicaid.gov");
 
     chart.xScale = d3.scaleLinear()
         .domain([0, 10000000])
@@ -122,8 +137,6 @@ ScatterPlot.prototype.update = function (data) {
 
     let chart = this;
     chart.full = data.slice();
-
-    chart.svg.selectAll("*").interrupt();
     chart.svg.selectAll(".circ").remove();
 
     chart.svg.append("g")
