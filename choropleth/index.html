@@ -28,6 +28,17 @@
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 <script>
 
+	const RED = "#FC4445";
+	const BLUE = "#5E2BFF";
+	const YELLOW = "#F9DC5c";
+	const AQUA = "#0F7173";
+	const LIGHT_GREEN = "#56E39F";
+	const ORANGE = "#F18F01";
+	const BRIGHT_GREEN = "#4CB944";
+	const WHITE = "#CAFAFE";
+	const SKY = "#55BCC9";
+	const MIDNIGHT = "#0B132B";
+
 	var svg = d3.select("svg"),
 		width = +svg.attr("width"),
 		height = +svg.attr("height");
@@ -42,7 +53,7 @@
 
 	svg.call(tip);
 
-	var unemployment = d3.map();
+	var fips = d3.map();
 
 	var path = d3.geoPath();
 
@@ -50,28 +61,29 @@
 		.domain([1, 10])
 		.rangeRound([600, 860]);
 
-	var color = d3.scaleThreshold()
-		.domain(d3.range(2, 10))
-		.range(d3.schemeBlues[9]);
-	// var color = d3.scaleLinear().domain([0, 100])
-	// 	.range(["brown", "steelblue"]);
+	// var color = d3.scaleThreshold()
+	// 	.domain(d3.range(10, 18))
+	// 	.range(d3.schemeBlues[9]);
+	var color = d3.scaleLinear().domain([0, 87])
+		.range([AQUA, RED])
+		.interpolate(d3.interpolateCubehelix);
 
 	var g = svg.append("g")
 		.attr("class", "key")
 		.attr("transform", "translate(0,40)");
 
-	g.selectAll("rect")
-		.data(color.range().map(function (d) {
-			d = color.invertExtent(d);
-			if (d[0] == null) d[0] = x.domain()[0];
-			if (d[1] == null) d[1] = x.domain()[1];
-			return d;
-		}))
-		.enter().append("rect")
-		.attr("height", 8)
-		.attr("x", function (d) { return x(d[0]); })
-		.attr("width", function (d) { return x(d[1]) - x(d[0]); })
-		.attr("fill", function (d) { return color(d[0]); });
+	// g.selectAll("rect")
+	// 	.data(color.range().map(function (d) {
+	// 		d = color.invertExtent(d);
+	// 		if (d[0] == null) d[0] = x.domain()[0];
+	// 		if (d[1] == null) d[1] = x.domain()[1];
+	// 		return d;
+	// 	}))
+	// 	.enter().append("rect")
+	// 	.attr("height", 8)
+	// 	.attr("x", function (d) { return x(d[0]); })
+	// 	.attr("width", function (d) { return x(d[1]) - x(d[0]); })
+	// 	.attr("fill", function (d) { return color(d[0]); });
 
 	g.append("text")
 		.attr("class", "caption")
@@ -80,7 +92,7 @@
 		.attr("fill", "#000")
 		.attr("text-anchor", "start")
 		.attr("font-weight", "bold")
-		.text("Unemployment rate");
+		.text("Drug Overdose Mortality Rate");
 
 	g.call(d3.axisBottom(x)
 		.tickSize(13)
@@ -91,8 +103,7 @@
 
 	var promises = [
 		d3.json("https://d3js.org/us-10m.v1.json"),
-		// d3.tsv("unemployment.tsv", function (d) { unemployment.set(d.id, +d.rate); })
-		d3.csv("./data/county_health_rankings.csv", function (d) { unemployment.set(d.FIPS, +d["Drug Overdose Mortality Rate"]); })
+		d3.csv("./data/county_health_rankings.csv", function (d) { fips.set(d.FIPS, +d["Drug Overdose Mortality Rate"]); })
 	]
 
 	Promise.all(promises).then(ready)
@@ -107,7 +118,7 @@
 				tip.show(d, this);
 				console.log(d)
 			})
-			.attr("fill", function (d) { return color(d.rate = unemployment.get(d.id)); })
+			.attr("fill", function (d) { return color(d.od_mortality_rate = fips.get(d.id)); })
 			.attr("d", path)
 			.append("title")
 			.text(function (d) { return d.rate + "%"; });
