@@ -104,7 +104,7 @@
 
 		var promises = [
 			d3.json("https://d3js.org/us-10m.v1.json"),
-			d3.csv("county_health_rankings.csv", function (d) { fips.set(d.FIPS, +d["Drug Overdose Mortality Rate"]); }),
+			d3.csv("./county_health_rankings.csv", function (d) { fips.set(d.FIPS, +d["Drug Overdose Mortality Rate"]); }),
 
 		]
 		Promise.all(promises).then(ready)
