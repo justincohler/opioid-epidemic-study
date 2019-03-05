@@ -9,11 +9,24 @@ const WHITE = "#CAFAFE";
 const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
 
-params = {
+const params = {
     // Choropleth Settings
     choropleth: {
         height: 550,
         width: 920,
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
+    },
+    histogram: {
+        height: 250,
+        width: 250,
+        margin: { top: 20, right: 20, bottom: 30, left: 40 }
     }
 }
+
+const colorScale = d3.scaleLinear().domain([0, 87])
+    .range([AQUA, RED])
+    .interpolate(d3.interpolateCubehelix);
+
+let fips = new Map();
+let selected_counties = [];
+

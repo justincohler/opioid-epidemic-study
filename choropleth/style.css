@@ -9,7 +9,6 @@ body {
 
 #narrow {
     width: 35%;
-    background: lightblue;
 }
 
 #wide {
@@ -20,7 +19,6 @@ body {
 
 #upper {
     height: 50%;
-    background: black;
 }
 
 #lower {
@@ -32,8 +30,8 @@ Choropleth
 =============================================================================*/
 .counties {
     fill: none;
-    stroke: #444444;
-    stroke-width: 0.1;
+    stroke: #777777;
+    stroke-width: .2;
 }
 
 .states {
@@ -61,18 +59,20 @@ Choropleth
 /**============================================================================
 Histogram
 ============================================================================**/
-.bar {
-    fill: steelblue;
-  }
+.bar {}
   
   .bar:hover {
-    fill: brown;
-  }
+    fill: #FC4445;
+}
   
   .axis--x path {
     display: none;
   }
-  
+
+text {
+    fill: #444444;
+    font-family: "Quick";
+}
 
 @font-face {
     font-family: "Quick";

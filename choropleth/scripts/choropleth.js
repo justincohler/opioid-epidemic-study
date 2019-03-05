@@ -1,6 +1,3 @@
-let selected_counties = [];
-let fips = d3.map();
-
 d3.select("#wide")
     .append("svg")
     .attr("id", "choropleth")
@@ -33,13 +30,27 @@ async function ready([us]) {
 
     let path = d3.geoPath();
 
+    const max_metric = 100;
+    const nbuckets = 100;
+
+    buckets = new Map();
+    fips.forEach((d) => {
+        stat = d.get("od_mortality_rate") == "" ? 0 : Math.trunc(parseInt(d.get("od_mortality_rate")));
+        d["bucket"] = Math.trunc(stat / max_metric * nbuckets);
+        if (!buckets.has(d.bucket)) {
+            buckets[d.bucket] = 1;
+        } else {
+            buckets.set(buckets.get(d.buckets) + 1);
+        }
+        return d;
+    });
+
+    console.log(buckets);
+
+
     const x = d3.scaleLinear()
         .domain([1, 10])
         .rangeRound([600, 860]);
-
-    const color = d3.scaleLinear().domain([0, 87])
-        .range([AQUA, RED])
-        .interpolate(d3.interpolateCubehelix);
 
     // Tooltips
     tip = d3.tip()
@@ -78,7 +89,7 @@ async function ready([us]) {
                 .attr("fill-opacity", 1.0);
 
         })
-        .attr("fill", function (d) { return color(d.od_mortality_rate = fips.get(d.id).get("od_mortality_rate")); })
+        .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips.get(d.id).get("od_mortality_rate")); })
         .attr("d", path)
         .append("title")
         .text(function (d) { return d.rate + "%"; });
