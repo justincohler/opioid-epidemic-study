@@ -1,10 +1,44 @@
+body {
+    background-color: #faffff;
+}
+
+#parent {
+    display: flex;
+    height: 100%;
+}
+
+#narrow {
+    width: 35%;
+    background: lightblue;
+}
+
+#wide {
+    display: flex;
+    flex: 1;
+    background: #faffff;
+}
+
+#upper {
+    height: 50%;
+    background: black;
+}
+
+#lower {
+    flex: 1;
+}
+
+/*=============================================================================
+Choropleth
+=============================================================================*/
 .counties {
     fill: none;
+    stroke: #444444;
+    stroke-width: 0.1;
 }
 
 .states {
     fill: none;
-    stroke: #cfcfcf;
+    stroke: #faffff;
     stroke-width: 0.5;
     stroke-linejoin: round;
 }
@@ -12,7 +46,7 @@
 .d3-tip {
     font-family: "Quick";
     line-height: 1.0;
-    font-size: 10px;
+    font-size: 14px;
     padding: 8px;
     background: rgba(0, 0, 0, 0.8);
     color: #cfcfcf;
@@ -20,23 +54,25 @@
     text-align: center;
 }
 
-.choropleth {}
-
-.distribution {
-    background-color: blueviolet;
-    display: block;
-    height: 100px;
-    width: 150px;
+#choropleth {
+    display: flex
 }
 
-.equation {
-    height: 30px;
-    width: 150px;
-    float: left;
-    border: 5px solid #000;
-    position: relative;
-    margin-top: 0;
-}
+/**============================================================================
+Histogram
+============================================================================**/
+.bar {
+    fill: steelblue;
+  }
+  
+  .bar:hover {
+    fill: brown;
+  }
+  
+  .axis--x path {
+    display: none;
+  }
+  
 
 @font-face {
     font-family: "Quick";

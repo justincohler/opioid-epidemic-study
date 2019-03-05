@@ -6,17 +6,24 @@
 	<meta charset="utf-8">
 </head>
 
+
 <body>
-	<div id="equation"></div>
 
-
-	<svg width="960" height="600"></svg>
+	<div id="parent">
+		<div id="wide"></div>
+		<div id="narrow">
+			<div id="upper"></div>
+			<div id="lower"></div>
+		</div>
+	</div>
 	<script src="https://d3js.org/d3.v5.min.js"></script>
 	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 	<script src="https://d3js.org/topojson.v2.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
 	<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-	<script src="./script.js"></script>
+	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<script src="./scripts/globals.js"></script>
+	<script src="./scripts/choropleth.js"></script>
 </body>
 
 </html>
