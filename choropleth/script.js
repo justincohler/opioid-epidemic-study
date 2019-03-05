@@ -32,17 +32,8 @@ w_ts = 300 - m_ts.right;
 
 var svg = d3.select("svg");
 
+// Data & Promises
 let fips = d3.map();
-
-var path = d3.geoPath();
-
-var x = d3.scaleLinear()
-    .domain([1, 10])
-    .rangeRound([600, 860]);
-
-var color = d3.scaleLinear().domain([0, 87])
-    .range([AQUA, RED])
-    .interpolate(d3.interpolateCubehelix);
 
 var promises = [
     d3.json("https://d3js.org/us-10m.v1.json"),
@@ -66,9 +57,20 @@ async function ready([us]) {
 
     });
 
-    // console.log(fips);
+    /*=========================================================================
+    Choropleth
+    =========================================================================*/
+    var path = d3.geoPath();
 
+    var x = d3.scaleLinear()
+        .domain([1, 10])
+        .rangeRound([600, 860]);
 
+    var color = d3.scaleLinear().domain([0, 87])
+        .range([AQUA, RED])
+        .interpolate(d3.interpolateCubehelix);
+
+    // Tooltips
     tip = d3.tip()
         .attr('class', 'd3-tip')
         .offset([-10, 0])
@@ -79,39 +81,14 @@ async function ready([us]) {
 
             return county + "," + state + "<br/>OD Mortality Rate: " + d.od_mortality_rate;
         });
-
     svg.call(tip);
-
 
     svg.append("g")
         .attr("id", "choropleth");
 
-    svg.append("g")
-        .attr("id", "distribution")
-        .attr("transform", `translate(${m_hist.left}, ${m_hist.top})`);
-
-    svg.append("g")
-        .attr("id", "ts")
-        .attr("transform", `translate(${m_ts.left}, ${m_ts.top})`);
-
-
     var choropleth = svg.select("#choropleth");
 
-    var distribution = svg.select("#distribution");
-
-    var ts = svg.select("#ts");
-
-
-    distribution.append('rect')
-        .attr("width", w_hist + m_hist.right)
-        .attr("height", m_hist.top + h_hist + m_hist.bottom)
-        .attr("opacity", 0)
-
-    ts.append('rect')
-        .attr("width", w_ts + m_ts.right)
-        .attr("height", m_ts.bottom + h_ts)
-        .attr("opacity", 0)
-
+    // County shapes
     choropleth.append("g")
         .attr("class", "counties")
         .attr("width", w_choro)
@@ -140,11 +117,43 @@ async function ready([us]) {
         .append("title")
         .text(function (d) { return d.rate + "%"; });
 
+    // State shapes
     choropleth.append("path")
         .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
-        // .attr("width", w_choro)
-        // .attr("height", h_choro)
         .attr("class", "states")
         .attr("d", path);
+
+
+    /*=========================================================================
+    Histogram
+    =========================================================================*/
+    svg.append("g")
+        .attr("id", "histogram")
+        .attr("transform", `translate(${m_hist.left}, ${m_hist.top})`);
+
+
+
+    var histogram = svg.select("#histogram");
+
+    histogram.append('rect')
+        .attr("width", w_hist + m_hist.right)
+        .attr("height", m_hist.top + h_hist + m_hist.bottom)
+        .attr("opacity", 0)
+
+
+    svg.append("g")
+        .attr("id", "ts")
+        .attr("transform", `translate(${m_ts.left}, ${m_ts.top})`);
+
+    var ts = svg.select("#ts");
+
+    /*=========================================================================
+    Time Series Plot
+    =========================================================================*/
+    ts.append('rect')
+        .attr("width", w_ts + m_ts.right)
+        .attr("height", m_ts.bottom + h_ts)
+        .attr("opacity", 0)
+
 }
 
