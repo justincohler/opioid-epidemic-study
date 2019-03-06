@@ -50,27 +50,31 @@ async function make_choropleth([us]) {
                 .attr("fill", function (d) { return colorScale(pctile); })
         })
         .on("click", function (d) {
-            if (!selected_counties.has(d.id)) {
-                selected_counties.add(d.id);
-                console.log(selected_counties);
+            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
 
+            // This is the first county clicked
+            if (selected_counties.size == 0) {
                 choropleth.selectAll(".counties")
                     .attr("fill-opacity", 0.7);
 
-                pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
-
                 d3.selectAll(".bar")
                     .attr("fill-opacity", 0.3);
+            }
+            // Click "ON"
+            if (!selected_counties.has(d.id)) {
+                selected_counties.add(d.id);
 
                 d3.select("#bar-" + pctile)
                     .attr("fill-opacity", 1.0);
 
-
                 d3.select(this)
                     .attr("fill-opacity", 1.0);
 
-            } else {
+            }
+            // Click "OFF"
+            else {
                 selected_counties.delete(d.id);
+                // This is the last county unclicked
                 if (selected_counties.size == 0) {
                     choropleth.selectAll(".counties")
                         .attr("fill-opacity", 1.0);
@@ -80,6 +84,10 @@ async function make_choropleth([us]) {
                 } else {
                     d3.select(this)
                         .attr("fill-opacity", 0.7);
+
+                    d3.select("#bar-" + pctile)
+                        .attr("fill-opacity", 0.3);
+
                 }
             }
         })
