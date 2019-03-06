@@ -30,7 +30,7 @@ let fips = {};
 let selected_counties = new Set();
 let promises = [
     d3.json("https://d3js.org/us-10m.v1.json"),
-    d3.csv("county_health_rankings.csv", function (d) {
+    d3.csv("./county_health_rankings.csv", function (d) {
         try {
             fips[d.FIPS] = {
                 "od_mortality_rate": d["Drug Overdose Mortality Rate"],
@@ -39,7 +39,7 @@ let promises = [
             };
         } catch { }
     }),
-    d3.tsv("county_fips.tsv", function (d) {
+    d3.tsv("./county_fips.tsv", function (d) {
         try {
             fips[d.FIPS]["state"] = d.State;
         } catch { }
