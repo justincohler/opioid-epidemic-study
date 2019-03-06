@@ -16,6 +16,12 @@
 			<input id="calculator" type="text" placeholder="SEARCH...">
 		</div>
 		<div class="row">
+			<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+			<button type="button" id="drag-me" draggable="true" ondragstart="drag(event)"
+				class="btn btn-primary">drag-me</button>
+		</div>
+		<div class="row">
 			<div id="parent">
 				<div id="wide"></div>
 				<div id="narrow">
@@ -31,9 +37,11 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
 	<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-	<script src="./scripts/globals.js"></script>
 	<script src="./scripts/choropleth.js"></script>
 	<script src="./scripts/histogram.js"></script>
+	<script src="./scripts/toolbar.js"></script>
+	<script src="./scripts/globals.js"></script>
+
 </body>
 
 </html>

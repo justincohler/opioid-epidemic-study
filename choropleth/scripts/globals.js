@@ -28,4 +28,35 @@ const colorScale = d3.scaleLinear().domain([0, 87])
 
 let fips = {};
 let selected_counties = new Set();
+let promises = [
+    d3.json("https://d3js.org/us-10m.v1.json"),
+    d3.csv("../data/county_health_rankings.csv", function (d) {
+        try {
+            fips[d.FIPS] = {
+                "od_mortality_rate": d["Drug Overdose Mortality Rate"],
+                "county": d.County,
+                "state": d.State
+            };
+        } catch { }
+    }),
+    d3.tsv("../data/county_fips.tsv", function (d) {
+        try {
+            fips[d.FIPS]["state"] = d.State;
+        } catch { }
+    })
+]
+
+Promise.all(promises).then(make_choropleth).then(make_histogram);
+
+arg_max = (data, arg) => {
+    const max_key = Object.keys(data).reduce((acc, d) => {
+        a = Number(data[acc][arg]);
+        b = Number(data[d][arg]);
+        return a > b ? acc : d;
+    });
+
+    return data[max_key][arg];
+}
+
+pct_of_max = (max, val) => Math.trunc(val / max * 100);
 

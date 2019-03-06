@@ -1,5 +1,14 @@
 body {
     background-color: #faffff;
+    font-family: Quick;
+}
+
+.btn-primary {
+    background-color: #FC4445;
+}
+
+.btn-primary:hover {
+    background-color: #0F7173;
 }
 
 #parent {
@@ -71,7 +80,7 @@ Choropleth
 Histogram
 ============================================================================**/
 .bar:hover {
-    fill: #FC4445;
+    fill: #F9DC5c;
 }
   
   .axis--x path {

@@ -1,32 +1,12 @@
-d3.select("#wide")
-    .append("svg")
-    .attr("id", "choropleth")
-    .attr("height", params.choropleth.height + params.choropleth.margin.top + params.choropleth.margin.bottom)
-    .attr("width", params.choropleth.width + params.choropleth.margin.left + params.choropleth.margin.right);
-
-let choropleth = d3.select("#choropleth");
-
-let promises = [
-    d3.json("https://d3js.org/us-10m.v1.json"),
-    d3.csv("../data/county_health_rankings.csv", function (d) {
-        try {
-            fips[d.FIPS] = {
-                "od_mortality_rate": d["Drug Overdose Mortality Rate"],
-                "county": d.County,
-                "state": d.State
-            };
-        } catch { }
-    })
-]
-Promise.all(promises).then(make_choropleth)
-
 async function make_choropleth([us]) {
 
-    d3.tsv("../data/county_fips.tsv", function (d) {
-        try {
-            fips[d.FIPS]["state"] = d.State;
-        } catch { }
-    });
+    d3.select("#wide")
+        .append("svg")
+        .attr("id", "choropleth")
+        .attr("height", params.choropleth.height + params.choropleth.margin.top + params.choropleth.margin.bottom)
+        .attr("width", params.choropleth.width + params.choropleth.margin.left + params.choropleth.margin.right);
+
+    let choropleth = d3.select("#choropleth");
 
     let path = d3.geoPath();
 
@@ -56,11 +36,22 @@ async function make_choropleth([us]) {
         .data(topojson.feature(us, us.objects.counties).features)
         .enter().append("path")
         .on("mouseover", function (d, i) {
-            console.log(d);
             tip.show(d, this);
-        })
-        .on("click", function (d, i) {
 
+            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+            d3.select("#bar-" + pctile)
+                .transition()
+                .duration(100)
+                .attr("fill", YELLOW);
+        })
+        .on("mouseout", (d) => {
+            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+            d3.select("#bar-" + pctile)
+                .transition()
+                .duration(400)
+                .attr("fill", function (d) { return colorScale(pctile); })
+        })
+        .on("click", function (d) {
             if (!selected_counties.has(d.id)) {
                 selected_counties.add(d.id);
                 console.log(selected_counties);
@@ -68,8 +59,14 @@ async function make_choropleth([us]) {
                 choropleth.selectAll(".counties")
                     .attr("fill-opacity", 0.7);
 
+                pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+
                 d3.selectAll(".bar")
-                    .attr("fill-opacity", 0.7);
+                    .attr("fill-opacity", 0.3);
+
+                d3.select("#bar-" + pctile)
+                    .attr("fill-opacity", 1.0);
+
 
                 d3.select(this)
                     .attr("fill-opacity", 1.0);
@@ -87,9 +84,6 @@ async function make_choropleth([us]) {
                         .attr("fill-opacity", 0.7);
                 }
             }
-
-
-
         })
         .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips[d.id]["od_mortality_rate"]); })
         .attr("d", path)
