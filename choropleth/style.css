@@ -4,11 +4,18 @@ body {
 }
 
 .btn-primary {
+    border: 0px solid black;
+    margin-top: 10px;
+    margin-left: 0px;
     background-color: #FC4445;
 }
 
 .btn-primary:hover {
     background-color: #0F7173;
+}
+
+.menubar {
+    margin-bottom: 25px;
 }
 
 #parent {

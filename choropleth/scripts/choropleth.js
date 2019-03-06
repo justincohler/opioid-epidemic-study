@@ -40,15 +40,13 @@ async function make_choropleth([us]) {
 
             pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
             d3.select("#bar-" + pctile)
-                .transition()
-                .duration(100)
                 .attr("fill", YELLOW);
         })
         .on("mouseout", (d) => {
             pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
             d3.select("#bar-" + pctile)
                 .transition()
-                .duration(400)
+                .duration(200)
                 .attr("fill", function (d) { return colorScale(pctile); })
         })
         .on("click", function (d) {
