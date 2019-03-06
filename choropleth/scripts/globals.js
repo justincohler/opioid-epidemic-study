@@ -25,8 +25,7 @@ const params = {
 
 const colorScale = d3.scaleLinear().domain([0, 87])
     .range([AQUA, RED])
-    .interpolate(d3.interpolateCubehelix);
 
-let fips = new Map();
-let selected_counties = [];
+let fips = {};
+let selected_counties = new Set();
 

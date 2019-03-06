@@ -9,44 +9,26 @@ let choropleth = d3.select("#choropleth");
 let promises = [
     d3.json("https://d3js.org/us-10m.v1.json"),
     d3.csv("../data/county_health_rankings.csv", function (d) {
-        fips.set(d.FIPS, d3.map());
         try {
-            fips.get(d.FIPS).set("od_mortality_rate", d["Drug Overdose Mortality Rate"]);
+            fips[d.FIPS] = {
+                "od_mortality_rate": d["Drug Overdose Mortality Rate"],
+                "county": d.County,
+                "state": d.State
+            };
         } catch { }
-    }).then(function (data) {
-
     })
 ]
-Promise.all(promises).then(ready);
+Promise.all(promises).then(make_choropleth)
 
-async function ready([us]) {
+async function make_choropleth([us]) {
 
     d3.tsv("../data/county_fips.tsv", function (d) {
         try {
-            fips.get(d.FIPS).set("county", d.Name).set("state", d.State);
+            fips[d.FIPS]["state"] = d.State;
         } catch { }
-
     });
 
     let path = d3.geoPath();
-
-    const max_metric = 100;
-    const nbuckets = 100;
-
-    buckets = new Map();
-    fips.forEach((d) => {
-        stat = d.get("od_mortality_rate") == "" ? 0 : Math.trunc(parseInt(d.get("od_mortality_rate")));
-        d["bucket"] = Math.trunc(stat / max_metric * nbuckets);
-        if (!buckets.has(d.bucket)) {
-            buckets[d.bucket] = 1;
-        } else {
-            buckets.set(buckets.get(d.buckets) + 1);
-        }
-        return d;
-    });
-
-    console.log(buckets);
-
 
     const x = d3.scaleLinear()
         .domain([1, 10])
@@ -58,10 +40,10 @@ async function ready([us]) {
         .offset([-10, 0])
         .direction('n')
         .html(function (d) {
-            county = fips.get(d.id).get("county");
-            state = fips.get(d.id).get("state");
+            county = fips[d.id]["county"];
+            state = fips[d.id]["state"];
 
-            text = county + "," + state + "<br/>OD Mortality Rate: ";
+            text = county + ", " + state + "<br/>OD Mortality Rate: ";
             text += d.od_mortality_rate == "" ? "0" : d.od_mortality_rate;
             return text;
         });
@@ -79,17 +61,37 @@ async function ready([us]) {
         })
         .on("click", function (d, i) {
 
-            selected_counties.push(d.id);
-            console.log(selected_counties);
+            if (!selected_counties.has(d.id)) {
+                selected_counties.add(d.id);
+                console.log(selected_counties);
 
-            choropleth.selectAll(".counties")
-                .attr("fill-opacity", 0.7);
+                choropleth.selectAll(".counties")
+                    .attr("fill-opacity", 0.7);
 
-            d3.select(this)
-                .attr("fill-opacity", 1.0);
+                d3.selectAll(".bar")
+                    .attr("fill-opacity", 0.7);
+
+                d3.select(this)
+                    .attr("fill-opacity", 1.0);
+
+            } else {
+                selected_counties.delete(d.id);
+                if (selected_counties.size == 0) {
+                    choropleth.selectAll(".counties")
+                        .attr("fill-opacity", 1.0);
+
+                    d3.selectAll(".bar")
+                        .attr("fill-opacity", 1.0);
+                } else {
+                    d3.select(this)
+                        .attr("fill-opacity", 0.7);
+                }
+            }
+
+
 
         })
-        .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips.get(d.id).get("od_mortality_rate")); })
+        .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips[d.id]["od_mortality_rate"]); })
         .attr("d", path)
         .append("title")
         .text(function (d) { return d.rate + "%"; });

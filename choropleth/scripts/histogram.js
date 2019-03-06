@@ -13,6 +13,21 @@ let g = histogram.append("g").attr("transform",
 
 var parseTime = d3.timeParse("%d-%b-%y");
 
+console.log(fips);
+
+// for (const key of fips.entries()) {
+//     console.log(key);
+// }
+
+async function make_histogram(data) {
+    let max_metric = 0;
+    const nbuckets = 100;
+
+    buckets = new Map();
+
+}
+
+
 d3.tsv("../data/morley.tsv").then(function (data) {
     hist_x.domain(data.map(function (d) {
         return d.Run;

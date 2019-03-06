@@ -9,10 +9,10 @@ body {
 
 #narrow {
     width: 35%;
+    display: flex;
 }
 
 #wide {
-    display: flex;
     flex: 1;
     background: #faffff;
 }
@@ -23,6 +23,17 @@ body {
 
 #lower {
     flex: 1;
+}
+
+#calculator {
+    font-family: Quick;
+    width: 600px;
+    padding: 6px;
+    margin: 10px 20px 10px 50px;
+    font-size: 1em;
+    border-radius: 5px;
+    box-shadow: none;
+    border: 1px solid #aaaaaa;
 }
 
 /*=============================================================================
@@ -59,9 +70,7 @@ Choropleth
 /**============================================================================
 Histogram
 ============================================================================**/
-.bar {}
-  
-  .bar:hover {
+.bar:hover {
     fill: #FC4445;
 }
   
