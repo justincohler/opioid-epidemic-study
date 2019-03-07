@@ -1,4 +1,4 @@
-async function make_histogram() {
+async function make_histogram(chr) {
 
     d3.select("#upper")
         .append("svg")
@@ -16,11 +16,11 @@ async function make_histogram() {
     var parseTime = d3.timeParse("%d-%b-%y");
 
 
-    let max_stat = arg_max(fips, "od_mortality_rate")
+    let max_stat = arg_max(chr, "od_mortality_rate")
     let hist_data = {};
 
-    Object.keys(fips)
-        .map((d) => pct_of_max(arg_max(fips, "od_mortality_rate"), fips[d].od_mortality_rate))
+    Object.keys(chr)
+        .map((d) => pct_of_max(arg_max(chr, "od_mortality_rate"), chr[d].od_mortality_rate))
         .forEach((d) => {
             hist_data[d] ? hist_data[d]++ : hist_data[d] = 1;
         })

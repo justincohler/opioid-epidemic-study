@@ -1,4 +1,4 @@
-async function make_choropleth([us]) {
+async function make_choropleth([us_json, chr]) {
 
     d3.select("#wide")
         .append("svg")
@@ -15,13 +15,13 @@ async function make_choropleth([us]) {
         .rangeRound([600, 860]);
 
     // Tooltips
-    tip = d3.tip()
+    let tip = d3.tip()
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .direction('n')
         .html(function (d) {
-            county = fips[d.id]["county"];
-            state = fips[d.id]["state"];
+            county = chr[d.id]["county"];
+            state = chr[d.id]["state"];
 
             text = county + ", " + state + "<br/>OD Mortality Rate: ";
             text += d.od_mortality_rate == "" ? "0" : d.od_mortality_rate;
@@ -33,24 +33,45 @@ async function make_choropleth([us]) {
     choropleth.append("g")
         .attr("class", "counties")
         .selectAll("path")
-        .data(topojson.feature(us, us.objects.counties).features)
-        .enter().append("path")
+        .data(topojson.feature(us_json, us_json.objects.counties).features)
+        .enter()
+        .append("path")
+        .attr("d", path);
+
+    // State shapes
+    choropleth.append("path")
+        .datum(topojson.mesh(us_json, us_json.objects.states, function (a, b) { return a !== b; }))
+        .attr("class", "states")
+        .attr("d", path);
+
+    return chr;
+}
+
+async function make_choropleth_interactive(chr) {
+
+    console.log("CHR[0] AGAIN: ", chr[0]);
+
+    let choropleth = d3.select("#choropleth");
+
+    choropleth.selectAll("path")
+        .data(chr)
+        .enter()
         .on("mouseover", function (d, i) {
             tip.show(d, this);
 
-            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
             d3.select("#bar-" + pctile)
                 .attr("fill", YELLOW);
         })
         .on("mouseout", (d) => {
-            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
             d3.select("#bar-" + pctile)
                 .transition()
                 .duration(200)
                 .attr("fill", function (d) { return colorScale(pctile); })
         })
         .on("click", function (d) {
-            pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
+            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
 
             // This is the first county clicked
             if (selected_counties.size == 0) {
@@ -91,15 +112,9 @@ async function make_choropleth([us]) {
                 }
             }
         })
-        .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips[d.id]["od_mortality_rate"]); })
-        .attr("d", path)
-        .append("title")
-        .text(function (d) { return d.rate + "%"; });
-
-    // State shapes
-    choropleth.append("path")
-        .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
-        .attr("class", "states")
-        .attr("d", path);
+        .attr("fill", function (d) {
+            console.log("HMM", d);
+            return colorScale(d.od_mortality_rate = chr[d.id]["od_mortality_rate"]);
+        });
 }
 

@@ -9,8 +9,10 @@ const WHITE = "#CAFAFE";
 const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
 
+const colorScale = d3.scaleLinear().domain([0, 87])
+    .range([AQUA, RED])
+
 const params = {
-    // Choropleth Settings
     choropleth: {
         height: 550,
         width: 920,
@@ -23,30 +25,11 @@ const params = {
     }
 }
 
-const colorScale = d3.scaleLinear().domain([0, 87])
-    .range([AQUA, RED])
-
+let chr_data = [];
 let fips = {};
 let selected_counties = new Set();
-let promises = [
-    d3.json("https://d3js.org/us-10m.v1.json"),
-    d3.csv("./county_health_rankings.csv", function (d) {
-        try {
-            fips[d.FIPS] = {
-                "od_mortality_rate": d["Drug Overdose Mortality Rate"],
-                "county": d.County,
-                "state": d.State
-            };
-        } catch { }
-    }),
-    d3.tsv("./county_fips.tsv", function (d) {
-        try {
-            fips[d.FIPS]["state"] = d.State;
-        } catch { }
-    })
-]
+let year = 2018;
 
-Promise.all(promises).then(make_choropleth).then(make_histogram);
 
 arg_max = (data, arg) => {
     const max_key = Object.keys(data).reduce((acc, d) => {
@@ -60,3 +43,51 @@ arg_max = (data, arg) => {
 
 pct_of_max = (max, val) => Math.trunc(val / max * 100);
 
+
+async function filter_year(data, year) {
+    console.log("Data: ", data);
+    let reformed = {};
+    await data.filter((d) => d.year == year).forEach((d) => {
+        console.log(d);
+        reformed[d.FIPS] = {
+            county: d.county,
+            state: d.state,
+            od_mortality_rate: d.od_mortality_rate
+        };
+    });
+
+    return reformed;
+};
+
+let promises = [
+    d3.json("https://d3js.org/us-10m.v1.json"),
+    d3.csv("./od_2014_2018.csv", (d) => {
+        return {
+            year: +d.Year,
+            county: d.County,
+            state: d.State,
+            od_mortality_rate: d["Drug Overdose Mortality Rate"]
+        };
+    })
+];
+
+Promise.all(promises)
+    .then(([us_json, chr]) => {
+
+        chr_data = chr;
+        console.log("Finished reformatting all years' chr_data.");
+        console.log("CHR Data[0]: ", chr_data[0]);
+
+        return [us_json, chr];
+    }).then(([us_json, chr]) => {
+        make_choropleth([us_json, chr]).then((chr) => {
+            make_choropleth_interactive(chr);
+        });
+        make_histogram(chr)
+    });
+    //     return [d3json, chr, fips];
+    // })
+    // .then(([d3json, chr, fips]) => {
+    //     make_choropleth([d3json]);
+    //     make_histogram([fips]);
+    // });
