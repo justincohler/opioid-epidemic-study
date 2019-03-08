@@ -26,40 +26,42 @@ const params = {
 const colorScale = d3.scaleLinear().domain([0, 87])
     .range([AQUA, RED])
 
+let YEAR = 2015;
 let fips = {};
 let selected_counties = new Set();
 let promises = [
     d3.json("wv_county_topo.json"),
-    d3.csv("./county_health_rankings.csv", function (d) {
-        try {
-            fips[d.FIPS] = {
-                "od_mortality_rate": d["Drug Overdose Mortality Rate"],
-                "county": d.County,
-                "state": d.State
-            };
-        } catch { }
-    }),
-    d3.tsv("./county_fips.tsv", function (d) {
-        try {
-            fips[d.FIPS]["state"] = d.State;
-        } catch { }
+    d3.csv("./od_2014_2018_wv.csv", function (d) {
+        return {
+            "FIPS": d.FIPS,
+            "year": +d.Year,
+            "od_mortality_rate": +d["Drug Overdose Mortality Rate"],
+            "county": d.County,
+            "state": d.State
+
+        }
     })
 ]
 
-Promise.all(promises)
-    .then(make_choropleth)
-    .then(make_choropleth_interactive)
-    .then(make_histogram);
+filter_year = ([geojson, chr]) => {
+    fips_wise = chr.filter(d => d.year === YEAR).reduce(function (obj, d) {
+        obj[d.FIPS] = { "state": d.state, "county": d.county, "od_mortality_rate": d.od_mortality_rate };
+        return obj;
+    })
+    return [geojson, fips_wise];
+}
 
 arg_max = (data, arg) => {
-    const max_key = Object.keys(data).reduce((acc, d) => {
-        a = Number(data[acc][arg]);
-        b = Number(data[d][arg]);
-        return a > b ? acc : d;
+    const max = d3.max(data, (d) => {
+        return d.od_mortality_rate
     });
 
-    return data[max_key][arg];
+    return max;
 }
 
 pct_of_max = (max, val) => Math.trunc(val / max * 100);
 
+Promise.all(promises)
+    .then(filter_year)
+    .then(make_choropleth)
+    .then(make_histogram);
