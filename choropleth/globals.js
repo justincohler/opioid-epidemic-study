@@ -12,7 +12,7 @@ const MIDNIGHT = "#0B132B";
 const params = {
     // Choropleth Settings
     choropleth: {
-        height: 550,
+        height: 740,
         width: 920,
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
     },
@@ -29,7 +29,7 @@ const colorScale = d3.scaleLinear().domain([0, 87])
 let fips = {};
 let selected_counties = new Set();
 let promises = [
-    d3.json("https://d3js.org/us-10m.v1.json"),
+    d3.json("wv_county_topo.json"),
     d3.csv("./county_health_rankings.csv", function (d) {
         try {
             fips[d.FIPS] = {
@@ -46,7 +46,10 @@ let promises = [
     })
 ]
 
-Promise.all(promises).then(make_choropleth).then(make_histogram);
+Promise.all(promises)
+    .then(make_choropleth)
+    .then(make_choropleth_interactive)
+    .then(make_histogram);
 
 arg_max = (data, arg) => {
     const max_key = Object.keys(data).reduce((acc, d) => {

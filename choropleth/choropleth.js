@@ -1,4 +1,4 @@
-async function make_choropleth([us]) {
+async function make_choropleth([us, chr]) {
 
     d3.select("#wide")
         .append("svg")
@@ -8,7 +8,11 @@ async function make_choropleth([us]) {
 
     let choropleth = d3.select("#choropleth");
 
-    let path = d3.geoPath();
+    var projection = d3.geoMercator().scale(7500).center([-80.4549, 39.0]);
+
+    // Create a path generator.
+    var path = d3.geoPath()
+        .projection(projection);
 
     const x = d3.scaleLinear()
         .domain([1, 10])
@@ -29,18 +33,41 @@ async function make_choropleth([us]) {
         });
     choropleth.call(tip);
 
+    console.log(us);
+
     // County shapes
     choropleth.append("g")
         .attr("class", "counties")
         .selectAll("path")
-        .data(topojson.feature(us, us.objects.counties).features)
+        .data(topojson.feature(us, us.objects.cb_2015_west_virginia_county_20m).features)
         .enter().append("path")
+        .attr("d", path)
+        .attr("id", (d) => {
+            return d.properties.GEOID
+        });
+
+    return [us, chr]
+}
+
+async function make_choropleth_interactive([us, chr]) {
+
+    let choropleth = d3.select("#choropleth");
+
+    d3.selectAll("path")
+        .data(chr)
+        .enter()
+        .attr("hello", (d) => {
+            console.log(d);
+        })
         .on("mouseover", function (d, i) {
+            console.log(d);
             tip.show(d, this);
 
             pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
             d3.select("#bar-" + pctile)
                 .attr("fill", YELLOW);
+
+            d3.select
         })
         .on("mouseout", (d) => {
             pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
@@ -50,6 +77,7 @@ async function make_choropleth([us]) {
                 .attr("fill", function (d) { return colorScale(pctile); })
         })
         .on("click", function (d) {
+            console.log(d);
             pctile = pct_of_max(arg_max(fips, "od_mortality_rate"), d.od_mortality_rate);
 
             // This is the first county clicked
@@ -91,15 +119,10 @@ async function make_choropleth([us]) {
                 }
             }
         })
-        .attr("fill", function (d) { return colorScale(d.od_mortality_rate = fips[d.id]["od_mortality_rate"]); })
-        .attr("d", path)
-        .append("title")
-        .text(function (d) { return d.rate + "%"; });
+        .attr("fill", function (d) {
+            console.log(d);
+            return colorScale(d.od_mortality_rate = fips[d.id]["od_mortality_rate"]);
+        });
 
-    // State shapes
-    choropleth.append("path")
-        .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
-        .attr("class", "states")
-        .attr("d", path);
 }
 
