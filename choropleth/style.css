@@ -24,20 +24,23 @@ body {
 }
 
 #narrow {
-    width: 35%;
-    display: flex;
+    width: 50%;
 }
 
 #wide {
+    display:flex;
     flex: 1;
     background: #faffff;
 }
 
 #upper {
     height: 50%;
+    display: flex;
 }
 
 #lower {
+    height:50%;
+    display:flex;
     flex: 1;
 }
 
@@ -51,6 +54,15 @@ body {
     box-shadow: none;
     border: 1px solid #aaaaaa;
 }
+
+#bar-NaN {
+    fill-opacity: 0.0;
+}
+
+/*=============================================================================
+Button Parking Lot
+=============================================================================*/
+
 
 /*=============================================================================
 Choropleth

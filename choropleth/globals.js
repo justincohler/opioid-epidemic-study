@@ -8,6 +8,7 @@ const BRIGHT_GREEN = "#4CB944";
 const WHITE = "#CAFAFE";
 const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
+const NTILES = 25;
 
 const params = {
     // Choropleth Settings
@@ -20,11 +21,19 @@ const params = {
         height: 250,
         width: 250,
         margin: { top: 20, right: 20, bottom: 30, left: 40 }
+    },
+    line: {
+        height: 250,
+        width: 250,
+        margin: { top: 20, right: 20, bottom: 20, left: 40 }
     }
 }
 
-const colorScale = d3.scaleLinear().domain([0, 87])
-    .range([AQUA, RED])
+const colorScale = d3.scaleLinear().domain([0, 85])
+    .range([AQUA, RED]);
+
+const bucketColorScale = d3.scaleLinear().domain([0, NTILES])
+    .range([AQUA, RED]);
 
 let YEAR = 2015;
 let fips = {};
@@ -52,16 +61,27 @@ filter_year = ([geojson, chr]) => {
 }
 
 arg_max = (data, arg) => {
-    const max = d3.max(data, (d) => {
-        return d.od_mortality_rate
+    const max = d3.max(Object.values(data), (d) => {
+        return d[arg];
     });
 
     return max;
 }
 
-pct_of_max = (max, val) => Math.trunc(val / max * 100);
+ntile = (max, val, buckets = 100) => Math.trunc(val / max * buckets);
 
 Promise.all(promises)
+    .then(([geojson, chr]) => {
+        make_line(chr);
+        return [geojson, chr];
+    })
     .then(filter_year)
-    .then(make_choropleth)
-    .then(make_histogram);
+    .then(([geojson, chr]) => {
+        make_choropleth([geojson, chr]);
+        make_histogram(chr);
+    });
+
+async function reanimate(year) {
+    YEAR = +year;
+    filter_year
+}

@@ -1,6 +1,5 @@
 async function make_choropleth([us, chr]) {
 
-    console.log(chr);
     d3.select("#wide")
         .append("svg")
         .attr("id", "choropleth")
@@ -9,7 +8,7 @@ async function make_choropleth([us, chr]) {
 
     let choropleth = d3.select("#choropleth");
 
-    var projection = d3.geoMercator().scale(7500).center([-80.4549, 39.0]);
+    var projection = d3.geoMercator().scale(8500).center([-80.4549, 39.5]);
 
     // Create a path generator.
     var path = d3.geoPath()
@@ -18,6 +17,8 @@ async function make_choropleth([us, chr]) {
     const x = d3.scaleLinear()
         .domain([1, 10])
         .rangeRound([600, 860]);
+
+    const MAX_STAT = arg_max(chr, "od_mortality_rate");
 
     // Tooltips
     tip = d3.tip()
@@ -46,28 +47,29 @@ async function make_choropleth([us, chr]) {
         })
         .attr("fill", (d) => {
             fips = d.properties.GEOID;
-            console.log(fips);
-            console.log(chr[fips]);
             value = chr[fips] && chr[fips].od_mortality_rate != "" ? chr[fips].od_mortality_rate : 0;
             return colorScale(value);
         })
         .on("mouseover", function (d, i) {
-            console.log(d);
-            tip.show(d, this);
+            od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
 
-            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
+            pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
+            console.log(pctile);
             d3.select("#bar-" + pctile)
                 .attr("fill", YELLOW);
         })
         .on("mouseout", (d) => {
-            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
+            od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
+            pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
+
             d3.select("#bar-" + pctile)
                 .transition()
                 .duration(200)
-                .attr("fill", function (d) { return colorScale(pctile); })
+                .attr("fill", function (d) { return bucketColorScale(pctile); })
         })
         .on("click", function (d) {
-            pctile = pct_of_max(arg_max(chr, "od_mortality_rate"), d.od_mortality_rate);
+            od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
+            pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
             // This is the first county clicked
             if (selected_counties.size == 0) {
