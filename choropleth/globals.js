@@ -35,7 +35,7 @@ const colorScale = d3.scaleLinear().domain([0, 85])
 const bucketColorScale = d3.scaleLinear().domain([0, NTILES])
     .range([AQUA, RED]);
 
-let YEAR = 2015;
+var YEAR = 2018;
 let fips = {};
 let selected_counties = new Set();
 let promises = [
@@ -52,8 +52,9 @@ let promises = [
     })
 ]
 
-filter_year = ([geojson, chr]) => {
-    fips_wise = chr.filter(d => d.year === YEAR).reduce(function (obj, d) {
+filter_year = ([geojson, chr, year]) => {
+    console.log("YEAR:", year);
+    fips_wise = chr.filter(d => d.year === year).reduce(function (obj, d) {
         obj[d.FIPS] = { "state": d.state, "county": d.county, "od_mortality_rate": d.od_mortality_rate };
         return obj;
     })
@@ -70,18 +71,33 @@ arg_max = (data, arg) => {
 
 ntile = (max, val, buckets = 100) => Math.trunc(val / max * buckets);
 
-Promise.all(promises)
-    .then(([geojson, chr]) => {
-        make_line(chr);
-        return [geojson, chr];
-    })
-    .then(filter_year)
-    .then(([geojson, chr]) => {
-        make_choropleth([geojson, chr]);
-        make_histogram(chr);
-    });
+
+var render = (year = 2018) => {
+    Promise.all(promises)
+        .then(([geojson, chr]) => {
+            make_histogram()
+            make_line(chr);
+            return [geojson, chr];
+        })
+        .then(([geojson, chr]) => {
+            return filter_year([geojson, chr, year]);
+        })
+        .then(([geojson, chr]) => {
+            make_choropleth([geojson, chr]);
+            update_histogram(chr);
+        });
+
+}
 
 async function reanimate(year) {
     YEAR = +year;
-    filter_year
+    Promise.all(promises)
+        .then(([geojson, chr]) => {
+            return filter_year([geojson, chr, year]);
+        })
+        .then(([geojson, chr]) => {
+            update_histogram(chr);
+        })
 }
+
+render();

@@ -25,8 +25,6 @@ async function make_line(chr) {
 
         });
 
-    console.log("Line Data:", line_data);
-
     final_data = []
     Object.keys(line_data)
         .map((key) => {
@@ -37,25 +35,8 @@ async function make_line(chr) {
             final_data.push(obj);
         });
 
-    final_data = final_data.filter((d) => {
-        console.log(d);
-        return d.name != "undefined";
-    });
+    final_data = final_data.filter(d => d.name != "undefined");
 
-    console.log("Final Data:", final_data);
-
-    var duration = 250;
-
-    var lineOpacity = "0.3";
-    var lineOpacityHover = ".9";
-    var otherLinesOpacityHover = "0.3";
-    var lineStroke = "2px";
-    var lineStrokeHover = "5px";
-
-    var circleOpacity = '0.85';
-    var circleOpacityOnLineHover = "0.3"
-    var circleRadius = 5;
-    var circleRadiusHover = 10;
 
     /* Scale */
     var xScale = d3.scaleLinear()
@@ -100,27 +81,27 @@ async function make_line(chr) {
         })
         .append('path')
         .attr('class', 'line')
-        .attr("id", d => "line-" + d.name)
+        .attr("id", d => ("line-" + d.name).toLowerCase())
         .attr('d', d => line(d.values))
         .style('stroke', (d, i) => colorScale(d.values.slice(-1)[0].od_mortality_rate))
-        .style('opacity', lineOpacity)
+        .style('opacity', 0.3)
         .on("mouseover", function (d) {
             d3.selectAll('.line')
-                .style('opacity', otherLinesOpacityHover);
+                .style('opacity', .3);
             d3.selectAll('.circle')
-                .style('opacity', circleOpacityOnLineHover);
+                .style('opacity', .3);
             d3.select(this)
-                .style('opacity', lineOpacityHover)
-                .style("stroke-width", lineStrokeHover)
+                .style('opacity', .9)
+                .style("stroke-width", "5px")
                 .style("cursor", "pointer");
         })
         .on("mouseout", function (d) {
             d3.selectAll(".line")
-                .style('opacity', lineOpacity);
+                .style('opacity', .9);
             d3.selectAll('.circle')
-                .style('opacity', circleOpacity);
+                .style('opacity', .9);
             d3.select(this)
-                .style("stroke-width", lineStroke)
+                .style("stroke-width", "2px")
                 .style("cursor", "none");
         });
 
@@ -135,6 +116,7 @@ async function make_line(chr) {
         .append("g")
         .attr("class", "circle")
         .on("mouseover", function (d) {
+
             d3.select(this)
                 .style("cursor", "pointer")
                 .append("text")
@@ -147,25 +129,32 @@ async function make_line(chr) {
             d3.select(this)
                 .style("cursor", "none")
                 .transition()
-                .duration(duration)
+                .duration(250)
                 .selectAll(".text").remove();
         })
         .append("circle")
         .attr("cx", d => xScale(d.year))
         .attr("cy", d => yScale(d.od_mortality_rate))
-        .attr("r", circleRadius)
-        .style('opacity', circleOpacity)
+        .attr("r", 5)
+        .style('opacity', .9)
+        .style("fill", (d) => {
+            if ("values" in d) {
+                return d.year === YEAR ? YELLOW : colorScale(d.values.slice(-1)[0].od_mortality_rate);
+            } else {
+                return d;
+            }
+        })
         .on("mouseover", function (d) {
             d3.select(this)
                 .transition()
-                .duration(duration)
-                .attr("r", circleRadiusHover);
+                .duration(250)
+                .attr("r", 10);
         })
         .on("mouseout", function (d) {
             d3.select(this)
                 .transition()
-                .duration(duration)
-                .attr("r", circleRadius);
+                .duration(250)
+                .attr("r", 5);
         });
 
 

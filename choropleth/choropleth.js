@@ -59,23 +59,24 @@ async function make_choropleth([us, chr]) {
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
 
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
-            console.log(pctile);
+
             d3.select("#bar-" + pctile)
                 .attr("fill", YELLOW);
 
-            lineID = "path#line-" + chr[d.properties.GEOID].county;
-            console.log("LINE ID: ", lineID);
+            lineID = ("#line-" + chr[d.properties.GEOID].county).toLowerCase();
 
-            d3.select(".line")
-                .attr("stroke-opacity", 0.3);
+            d3.select(lineID)
+                .classed("hoverLine", true);
 
-            d3.select(lineID + ".line")
-                .attr("fill", AQUA)
-                .attr("stroke", YELLOW);
         })
         .on("mouseout", (d) => {
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
+
+            lineID = ("#line-" + chr[d.properties.GEOID].county).toLowerCase();
+
+            d3.select(lineID)
+                .classed("hoverLine", false);
 
             d3.select("#bar-" + pctile)
                 .transition()
@@ -86,47 +87,49 @@ async function make_choropleth([us, chr]) {
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
-            d3.selectAll(".line")
-                .attr("fill", YELLOW)
-                .attr("stroke", YELLOW);
+            /* CLICK OFF */
+            if (selected_counties.has(d.properties.GEOID)) {
+                selected_counties.delete(d.properties.GEOID);
+                // This is the last county unclicked
+                if (selected_counties.size == 0) {
+                    choropleth.selectAll(".counties")
+                        .classed("activeCounty", false)
+                        .classed("inactiveCounty", false);
 
-            // This is the first county clicked
-            if (selected_counties.size == 0) {
-                choropleth.selectAll(".counties")
-                    .attr("fill-opacity", 0.7);
+                    choropleth.select(this)
+                        .classed("activeCounty", false)
+                        .classed("inactiveCounty", false);
 
-                d3.selectAll(".bar")
-                    .attr("fill-opacity", 0.3);
+                    d3.selectAll(".bar")
+                        .attr("fill-opacity", 1.0);
+                } else {
+                    d3.select(this)
+                        .classed("inactiveCounty", true)
+                        .classed("activeCounty", false);
+
+                    d3.select("#bar-" + pctile)
+                        .attr("fill-opacity", 0.3);
+
+                }
             }
-            // Click "ON"
-            if (!selected_counties.has(d.properties.GEOID)) {
+            /* CLICK ON */
+            else {
+                // This is the first county clicked
+                if (selected_counties.size == 0) {
+                    choropleth.selectAll(`.counties`)
+                        .classed("inactiveCounty", true);
+
+                    d3.selectAll(".bar")
+                        .attr("fill-opacity", 0.3);
+                }
+                // Click "ON"
                 selected_counties.add(d.properties.GEOID);
 
                 d3.select("#bar-" + pctile)
                     .attr("fill-opacity", 1.0);
 
                 d3.select(this)
-                    .attr("fill-opacity", 1.0);
-
-            }
-            // Click "OFF"
-            else {
-                selected_counties.delete(d.properties.GEOID);
-                // This is the last county unclicked
-                if (selected_counties.size == 0) {
-                    choropleth.selectAll(".counties")
-                        .attr("fill-opacity", 1.0);
-
-                    d3.selectAll(".bar")
-                        .attr("fill-opacity", 1.0);
-                } else {
-                    d3.select(this)
-                        .attr("fill-opacity", 0.7);
-
-                    d3.select("#bar-" + pctile)
-                        .attr("fill-opacity", 0.3);
-
-                }
+                    .classed("activeCounty", true);
             }
         });
 

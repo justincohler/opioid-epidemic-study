@@ -74,8 +74,8 @@ Choropleth
 =============================================================================*/
 .counties {
     fill: none;
-    stroke: #777777;
-    stroke-width: .2;
+    stroke: #faffff;
+    stroke-width: .2px;
 }
 
 .states {
@@ -122,11 +122,34 @@ text {
     color: #777777;
 }
 
+.selected {
+    opacity: .9;
+    fill-opacity: .9;
+    stroke-opacity: .9;
+}
+
+.inactiveCounty {
+   fill-opacity: 0.7; 
+}
+
+.activeCounty {
+    fill-opacity: 1.0;
+}
+
+.hoverLine {
+    stroke: #F9DC5c !important;
+    stroke-width: 5px;
+    stroke-opacity: 1.0 !important;
+    opacity: 1.0 !important;
+    fill: none;
+    fill-opacity: 0.0;
+}
+
 /**============================================================================
 Line Plot
 ============================================================================**/
 .line {
-    fill: #eee;
+    fill: none;
 }
 
 @font-face {
