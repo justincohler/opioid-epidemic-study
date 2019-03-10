@@ -6,7 +6,6 @@ async function make_line(chr) {
 
     const MAX_STAT = arg_max(chr, "od_mortality_rate");
 
-
     Object.values(chr)
         .map((d) => {
             if (d.county in line_data) {
@@ -141,7 +140,7 @@ async function make_line(chr) {
         .attr("r", 5)
         .style('opacity', .9)
         .style("fill", (d) => {
-            try{
+            try {
                 return d.year === YEAR ? YELLOW : colorScale(d.values.slice(-1)[0].od_mortality_rate);
             } catch {
                 return d;
