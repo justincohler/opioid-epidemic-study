@@ -8,7 +8,7 @@ async function make_choropleth([us, chr]) {
 
     let choropleth = d3.select("#choropleth");
 
-    var projection = d3.geoMercator().scale(8500).center([-80.4549, 39.5]);
+    var projection = d3.geoMercator().scale(8500).center([-79.5, 39.5]);
 
     // Create a path generator.
     var path = d3.geoPath()
@@ -51,12 +51,27 @@ async function make_choropleth([us, chr]) {
             return colorScale(value);
         })
         .on("mouseover", function (d, i) {
+            tip.show(d, this);
+
+            d3.select(this)
+                .style("cursor", "pointer");
+
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
 
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
             console.log(pctile);
             d3.select("#bar-" + pctile)
                 .attr("fill", YELLOW);
+
+            lineID = "path#line-" + chr[d.properties.GEOID].county;
+            console.log("LINE ID: ", lineID);
+
+            d3.select(".line")
+                .attr("stroke-opacity", 0.3);
+
+            d3.select(lineID + ".line")
+                .attr("fill", AQUA)
+                .attr("stroke", YELLOW);
         })
         .on("mouseout", (d) => {
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
@@ -70,6 +85,10 @@ async function make_choropleth([us, chr]) {
         .on("click", function (d) {
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
+
+            d3.selectAll(".line")
+                .attr("fill", YELLOW)
+                .attr("stroke", YELLOW);
 
             // This is the first county clicked
             if (selected_counties.size == 0) {

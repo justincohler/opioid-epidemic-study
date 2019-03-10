@@ -18,17 +18,22 @@ body {
     margin-bottom: 25px;
 }
 
+.domain {
+    color: #777777;
+}
+
 #parent {
     display: flex;
     height: 100%;
 }
 
 #narrow {
-    width: 50%;
+    flex: 1;
 }
 
 #wide {
     display:flex;
+    width: 60%;
     flex: 1;
     background: #faffff;
 }
@@ -109,6 +114,19 @@ Histogram
 text {
     fill: #444444;
     font-family: "Quick";
+}
+
+.tick {
+    font-size: 12px;
+    fill: #777777;
+    color: #777777;
+}
+
+/**============================================================================
+Line Plot
+============================================================================**/
+.line {
+    fill: #eee;
 }
 
 @font-face {

@@ -15,6 +15,10 @@ async function make_histogram(chr) {
 
 
     let hist_data = {};
+    for (i = 0; i <= NTILES; i++) {
+        hist_data[i] = 0;
+    }
+
     let max_stat = arg_max(chr, "od_mortality_rate");
 
     Object.values(chr)
@@ -48,7 +52,7 @@ async function make_histogram(chr) {
         .attr("class", "bar")
         .attr("fill", (d) => bucketColorScale(d.bucket))
         .attr("x", (d) => hist_x(d.bucket))
-        .attr("y", (d) => 0)
+        .attr("y", (d) => params.histogram.height - hist_y(d.count))
         .attr("width", hist_x.bandwidth())
         .attr("height", (d) => {
             h = hist_y(d.count);

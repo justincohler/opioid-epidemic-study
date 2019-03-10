@@ -14,17 +14,17 @@ const params = {
     // Choropleth Settings
     choropleth: {
         height: 740,
-        width: 920,
+        width: 900,
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
     },
     histogram: {
-        height: 250,
-        width: 250,
+        height: 300,
+        width: 400,
         margin: { top: 20, right: 20, bottom: 30, left: 40 }
     },
     line: {
-        height: 250,
-        width: 250,
+        height: 300,
+        width: 400,
         margin: { top: 20, right: 20, bottom: 20, left: 40 }
     }
 }

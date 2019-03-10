@@ -37,100 +37,41 @@ async function make_line(chr) {
             final_data.push(obj);
         });
 
-    console.log("Final Data:", final_data);
-
-    var data = [
-        {
-            name: "USA",
-            values: [
-                { date: "2000", price: "100" },
-                { date: "2001", price: "110" },
-                { date: "2002", price: "145" },
-                { date: "2003", price: "241" },
-                { date: "2004", price: "101" },
-                { date: "2005", price: "90" },
-                { date: "2006", price: "10" },
-                { date: "2007", price: "35" },
-                { date: "2008", price: "21" },
-                { date: "2009", price: "201" }
-            ]
-        },
-        {
-            name: "Canada",
-            values: [
-                { date: "2000", price: "200" },
-                { date: "2001", price: "120" },
-                { date: "2002", price: "33" },
-                { date: "2003", price: "21" },
-                { date: "2004", price: "51" },
-                { date: "2005", price: "190" },
-                { date: "2006", price: "120" },
-                { date: "2007", price: "85" },
-                { date: "2008", price: "221" },
-                { date: "2009", price: "101" }
-            ]
-        },
-        {
-            name: "Maxico",
-            values: [
-                { date: "2000", price: "50" },
-                { date: "2001", price: "10" },
-                { date: "2002", price: "5" },
-                { date: "2003", price: "71" },
-                { date: "2004", price: "20" },
-                { date: "2005", price: "9" },
-                { date: "2006", price: "220" },
-                { date: "2007", price: "235" },
-                { date: "2008", price: "61" },
-                { date: "2009", price: "10" }
-            ]
-        }
-    ];
-
-    var width = 250;
-    var height = 250;
-    var margin = 50;
-    var duration = 250;
-
-    var lineOpacity = "0.25";
-    var lineOpacityHover = "0.85";
-    var otherLinesOpacityHover = "0.1";
-    var lineStroke = "1.5px";
-    var lineStrokeHover = "2.5px";
-
-    var circleOpacity = '0.85';
-    var circleOpacityOnLineHover = "0.25"
-    var circleRadius = 3;
-    var circleRadiusHover = 6;
-
-
-    /* Format Data */
-    var parseDate = d3.timeParse("%Y");
-    data.forEach(function (d) {
-        d.values.forEach(function (d) {
-            d.date = parseDate(d.date);
-            d.price = +d.price;
-        });
+    final_data = final_data.filter((d) => {
+        console.log(d);
+        return d.name != "undefined";
     });
 
+    console.log("Final Data:", final_data);
+
+    var duration = 250;
+
+    var lineOpacity = "0.3";
+    var lineOpacityHover = ".9";
+    var otherLinesOpacityHover = "0.3";
+    var lineStroke = "2px";
+    var lineStrokeHover = "5px";
+
+    var circleOpacity = '0.85';
+    var circleOpacityOnLineHover = "0.3"
+    var circleRadius = 5;
+    var circleRadiusHover = 10;
 
     /* Scale */
     var xScale = d3.scaleLinear()
         .domain([2014, 2018])
-        .range([0, width - margin]);
+        .range([0, params.line.width - params.line.margin.left]);
 
     var yScale = d3.scaleLinear()
         .domain([0, MAX_STAT])
-        .range([height - margin, 0]);
-
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
+        .range([params.line.height - params.line.margin.top, 0]);
 
     /* Add SVG */
     var svg = d3.select("#lower").append("svg")
-        .attr("width", (width + margin) + "px")
-        .attr("height", (height + margin) + "px")
+        .attr("width", params.line.width + params.line.margin.left)
+        .attr("height", params.line.height + params.line.margin.top)
         .append('g')
-        .attr("transform", `translate(${margin}, ${margin})`);
+        .attr("transform", `translate(${params.line.margin.left}, ${params.line.margin.top})`);
 
 
     /* Add line into SVG */
@@ -148,10 +89,10 @@ async function make_line(chr) {
         .on("mouseover", function (d, i) {
             svg.append("text")
                 .attr("class", "title-text")
-                .style("fill", color(i))
+                .style("fill", colorScale(d.values.slice(-1)[0].od_mortality_rate))
                 .text(d.name)
                 .attr("text-anchor", "middle")
-                .attr("x", (width - margin) / 2)
+                .attr("x", (params.line.width - params.line.margin.left) / 2)
                 .attr("y", 5);
         })
         .on("mouseout", function (d) {
@@ -159,8 +100,9 @@ async function make_line(chr) {
         })
         .append('path')
         .attr('class', 'line')
+        .attr("id", d => "line-" + d.name)
         .attr('d', d => line(d.values))
-        .style('stroke', (d, i) => color(i))
+        .style('stroke', (d, i) => colorScale(d.values.slice(-1)[0].od_mortality_rate))
         .style('opacity', lineOpacity)
         .on("mouseover", function (d) {
             d3.selectAll('.line')
@@ -187,7 +129,7 @@ async function make_line(chr) {
     lines.selectAll("circle-group")
         .data(final_data).enter()
         .append("g")
-        .style("fill", (d, i) => color(i))
+        .style("fill", (d) => colorScale(d.values.slice(-1)[0].od_mortality_rate))
         .selectAll("circle")
         .data(d => d.values).enter()
         .append("g")
@@ -228,20 +170,11 @@ async function make_line(chr) {
 
 
     /* Add Axis into SVG */
-    var xAxis = d3.axisBottom(xScale).ticks(5);
-    var yAxis = d3.axisLeft(yScale).ticks(5);
+    var xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d3.format("d"));
 
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", `translate(0, ${height - margin})`)
+        .attr("transform", `translate(0, ${params.line.height - params.line.margin.top})`)
         .call(xAxis);
 
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append('text')
-        .attr("y", 15)
-        .attr("transform", "rotate(-90)")
-        .attr("fill", "#000")
-        .text("Total values");
 }
