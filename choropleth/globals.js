@@ -15,17 +15,17 @@ const params = {
     choropleth: {
         height: 740,
         width: 900,
-        margin: { top: 20, right: 20, bottom: 20, left: 20 }
+        margin: { top: 20, right: 0, bottom: 20, left: 20 }
     },
     histogram: {
         height: 300,
         width: 400,
-        margin: { top: 20, right: 20, bottom: 30, left: 40 }
+        margin: { top: 20, right: 20, bottom: 30, left: 20 }
     },
     line: {
         height: 300,
         width: 400,
-        margin: { top: 20, right: 20, bottom: 20, left: 40 }
+        margin: { top: 20, right: 20, bottom: 20, left: 20 }
     }
 }
 

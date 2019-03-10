@@ -101,7 +101,7 @@ async function make_choropleth([us, chr]) {
                         .classed("inactiveCounty", false);
 
                     d3.selectAll(".bar")
-                        .attr("fill-opacity", 1.0);
+                        .attr("fill-opacity", 0.9);
                 } else {
                     d3.select(this)
                         .classed("inactiveCounty", true)

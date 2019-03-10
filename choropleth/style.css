@@ -15,7 +15,7 @@ body {
 }
 
 .menubar {
-    margin-bottom: 25px;
+    margin: 0 auto;
 }
 
 .domain {
@@ -33,7 +33,7 @@ body {
 
 #wide {
     display:flex;
-    width: 60%;
+    width: 55%;
     flex: 1;
     background: #faffff;
 }
@@ -51,7 +51,7 @@ body {
 
 #calculator {
     font-family: Quick;
-    width: 600px;
+    width: 920px;
     padding: 6px;
     margin: 10px 20px 10px 50px;
     font-size: 1em;
@@ -75,7 +75,7 @@ Choropleth
 .counties {
     fill: none;
     stroke: #faffff;
-    stroke-width: .2px;
+    stroke-width: .1px;
 }
 
 .states {
@@ -94,6 +94,18 @@ Choropleth
     color: #cfcfcf;
     border-radius: 4px;
     text-align: center;
+}
+
+.overmap {
+    position: relative;
+    margin-left: 350px;
+    margin-top: 50px;
+    width: 400px;
+    height: 200px;
+}
+
+.underneath {
+    margin-top: -220px;
 }
 
 #choropleth {
@@ -133,7 +145,7 @@ text {
 }
 
 .activeCounty {
-    fill-opacity: 1.0;
+    fill-opacity: 0.9;
 }
 
 .hoverLine {
