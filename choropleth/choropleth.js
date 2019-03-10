@@ -75,6 +75,8 @@ async function update_choropleth(chr) {
 
         })
         .on("mouseout", (d) => {
+            tip.hide(d, this);
+
             od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
             pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
@@ -144,4 +146,12 @@ async function update_choropleth(chr) {
             value = chr[fips] && chr[fips].od_mortality_rate != "" ? chr[fips].od_mortality_rate : 0;
             return colorScale(value);
         });
+
+    // SOURCE
+    choropleth
+        .append("text")
+        .attr("class", "source")
+        .attr("x", params.choropleth.width / 2 - 50)
+        .attr("y", params.choropleth.height - 50)
+        .html("Source: CountyHealthRankings.org");
 }

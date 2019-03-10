@@ -179,6 +179,11 @@ Line Plot
     fill: none;
 }
 
+.source {
+    font-size:12px;
+    color: #999999;
+}
+
 @font-face {
     font-family: "Quick";
     src: url(Quick.ttf);
