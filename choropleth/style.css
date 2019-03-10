@@ -1,5 +1,5 @@
 body {
-    background-color: #faffff;
+    background-color: #edf3f7;
     font-family: Quick;
 }
 
@@ -46,7 +46,6 @@ body {
     display:flex;
     width: 55%;
     flex: 1;
-    background: #faffff;
 }
 
 #upper {
@@ -85,7 +84,7 @@ Choropleth
 =============================================================================*/
 .counties {
     fill: none;
-    stroke: #faffff;
+    stroke: #edf3f7;
     stroke-width: .1px;
 }
 
@@ -96,7 +95,7 @@ Choropleth
 
 .states {
     fill: none;
-    stroke: #faffff;
+    stroke: #edf3f7;
     stroke-width: 0.5;
     stroke-linejoin: round;
 }
@@ -107,7 +106,7 @@ Choropleth
     font-size: 14px;
     padding: 8px;
     background: rgba(0, 0, 0, 0.8);
-    color: #cfcfcf;
+    color: #edf3f7;
     border-radius: 4px;
     text-align: center;
 }
@@ -145,7 +144,7 @@ text {
 }
 
 .tick {
-    font-size: 12px;
+    font-size: 14px;
     fill: #777777;
     color: #777777;
 }
