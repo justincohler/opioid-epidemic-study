@@ -6,8 +6,6 @@ async function make_choropleth([us, chr]) {
         .attr("height", params.choropleth.height + params.choropleth.margin.top + params.choropleth.margin.bottom)
         .attr("width", params.choropleth.width + params.choropleth.margin.left + params.choropleth.margin.right);
 
-    let choropleth = d3.select("#choropleth");
-
     var projection = d3.geoMercator().scale(8500).center([-79.5, 39.5]);
 
     // Create a path generator.
@@ -17,6 +15,26 @@ async function make_choropleth([us, chr]) {
     const x = d3.scaleLinear()
         .domain([1, 10])
         .rangeRound([600, 860]);
+
+    let choropleth = d3.select("#choropleth");
+
+    // County shapes
+    choropleth.append("g")
+        .attr("class", "counties")
+        .selectAll("path")
+        .data(topojson.feature(us, us.objects.cb_2015_west_virginia_county_20m).features)
+        .enter().append("path")
+        .attr("d", path)
+        .attr("id", (d) => {
+            return d.properties.GEOID
+        })
+
+    return chr
+}
+
+async function update_choropleth(chr) {
+
+    let choropleth = d3.select("#choropleth");
 
     const MAX_STAT = arg_max(chr, "od_mortality_rate");
 
@@ -36,20 +54,7 @@ async function make_choropleth([us, chr]) {
     choropleth.call(tip);
 
     // County shapes
-    choropleth.append("g")
-        .attr("class", "counties")
-        .selectAll("path")
-        .data(topojson.feature(us, us.objects.cb_2015_west_virginia_county_20m).features)
-        .enter().append("path")
-        .attr("d", path)
-        .attr("id", (d) => {
-            return d.properties.GEOID
-        })
-        .attr("fill", (d) => {
-            fips = d.properties.GEOID;
-            value = chr[fips] && chr[fips].od_mortality_rate != "" ? chr[fips].od_mortality_rate : 0;
-            return colorScale(value);
-        })
+    choropleth.selectAll("path")
         .on("mouseover", function (d, i) {
             tip.show(d, this);
 
@@ -131,7 +136,12 @@ async function make_choropleth([us, chr]) {
                 d3.select(this)
                     .classed("activeCounty", true);
             }
+        })
+        .transition()
+        .duration(1000)
+        .attr("fill", (d) => {
+            fips = d.properties.GEOID;
+            value = chr[fips] && chr[fips].od_mortality_rate != "" ? chr[fips].od_mortality_rate : 0;
+            return colorScale(value);
         });
-
-    return chr
 }

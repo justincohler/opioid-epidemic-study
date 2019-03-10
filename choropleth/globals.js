@@ -75,7 +75,8 @@ ntile = (max, val, buckets = 100) => Math.trunc(val / max * buckets);
 var render = (year = 2018) => {
     Promise.all(promises)
         .then(([geojson, chr]) => {
-            make_histogram()
+            make_histogram();
+            make_choropleth([geojson, chr]);
             make_line(chr);
             return [geojson, chr];
         })
@@ -83,7 +84,7 @@ var render = (year = 2018) => {
             return filter_year([geojson, chr, year]);
         })
         .then(([geojson, chr]) => {
-            make_choropleth([geojson, chr]);
+            update_choropleth(chr);
             update_histogram(chr);
         });
 
@@ -97,6 +98,7 @@ async function reanimate(year) {
         })
         .then(([geojson, chr]) => {
             update_histogram(chr);
+            update_choropleth(chr);
         })
 }
 

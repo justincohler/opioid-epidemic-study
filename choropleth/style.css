@@ -14,6 +14,13 @@ body {
     background-color: #0F7173;
 }
 
+.btn-secondary {
+    border: 0px solid black;
+    margin-top: 10px;
+    margin-left: 0px;
+    background-color: #0F7173;
+}
+
 .menubar {
     margin: 0 auto;
 }
@@ -51,7 +58,7 @@ body {
 
 #calculator {
     font-family: Quick;
-    width: 920px;
+    width: 838px;
     padding: 6px;
     margin: 10px 20px 10px 50px;
     font-size: 1em;
@@ -76,6 +83,11 @@ Choropleth
     fill: none;
     stroke: #faffff;
     stroke-width: .1px;
+}
+
+.counties > path:hover {
+    stroke: #F9DC5c;
+    stroke-width: 2px;
 }
 
 .states {

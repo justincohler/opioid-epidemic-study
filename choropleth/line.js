@@ -141,9 +141,9 @@ async function make_line(chr) {
         .attr("r", 5)
         .style('opacity', .9)
         .style("fill", (d) => {
-            if ("values" in d) {
+            try{
                 return d.year === YEAR ? YELLOW : colorScale(d.values.slice(-1)[0].od_mortality_rate);
-            } else {
+            } catch {
                 return d;
             }
         })

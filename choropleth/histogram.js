@@ -63,5 +63,5 @@ async function update_histogram(chr) {
             // console.log("Count:", d.count, "Height: ", h);
             return h;
         });
-
+    return chr;
 }
