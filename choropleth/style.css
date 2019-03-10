@@ -21,6 +21,10 @@ body {
     background-color: #0F7173;
 }
 
+.btn-secondary:hover {
+    background-color: #FC4445;
+}
+
 .menubar {
     margin: 0 auto;
 }

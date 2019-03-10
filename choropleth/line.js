@@ -95,12 +95,13 @@ async function make_line(chr) {
                 .style("cursor", "pointer");
         })
         .on("mouseout", function (d) {
-            d3.selectAll(".line")
-                .style('opacity', .9);
             d3.selectAll('.circle')
                 .style('opacity', .9);
             d3.select(this)
-                .style("stroke-width", "2px")
+                .transition()
+                .duration(500)
+                .style("opacity", .3)
+                .style("stroke-width", "1")
                 .style("cursor", "none");
         });
 
@@ -131,7 +132,7 @@ async function make_line(chr) {
             d3.select(this)
                 .style("cursor", "none")
                 .transition()
-                .duration(250)
+                .duration(500)
                 .selectAll(".text").remove();
         })
         .append("circle")
