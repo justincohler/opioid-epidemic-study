@@ -1,4 +1,10 @@
-/* Source/Credit: https://codepen.io/zakariachowdhury/pen/JEmjwq
+/* 
+Source/Credit: https://codepen.io/zakariachowdhury/pen/JEmjwq
+
+The above source was invaluable in getting a starting point for how to create the
+many elements involved in the below line graph (the lines themselves, the 
+data points as circles, the informative text revealed on hover, etc.)
+
 */
 async function make_line(chr) {
 

@@ -1,3 +1,8 @@
+/* 
+Source/Credit: https://bl.ocks.org/adamjanes/6cf85a4fd79e122695ebde7d41fe327f 
+
+The above source served as the start for this SVG element in the larger visualization.
+*/
 async function make_choropleth([us, chr]) {
 
     d3.select("#wide")
