@@ -81,9 +81,6 @@ async function make_line(chr) {
         .append('path')
         .attr('class', 'line')
         .attr("id", d => ("line-" + d.name).toLowerCase())
-        .attr('d', d => line(d.values))
-        .style('stroke', (d, i) => colorScale(d.values.slice(-1)[0].od_mortality_rate))
-        .style('opacity', 0.3)
         .on("mouseover", function (d) {
             d3.selectAll('.line')
                 .style('opacity', .3);
@@ -103,7 +100,13 @@ async function make_line(chr) {
                 .style("opacity", .3)
                 .style("stroke-width", "1")
                 .style("cursor", "none");
-        });
+        })
+        .transition()
+        .duration(2000)
+        .attr('d', d => line(d.values))
+        .style('stroke', (d, i) => colorScale(d.values.slice(-1)[0].od_mortality_rate))
+        .style('opacity', 0.3)
+
 
 
     /* Add circles in the line */

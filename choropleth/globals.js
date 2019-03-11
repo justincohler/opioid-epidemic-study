@@ -29,7 +29,7 @@ const params = {
     }
 }
 
-const colorScale = d3.scaleLinear().domain([0, 85])
+const colorScale = d3.scaleLinear().domain([0, 82])
     .range([AQUA, RED]);
 
 const bucketColorScale = d3.scaleLinear().domain([0, NTILES])

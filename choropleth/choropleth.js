@@ -140,7 +140,7 @@ async function update_choropleth(chr) {
             }
         })
         .transition()
-        .duration(1000)
+        .duration(2000)
         .attr("fill", (d) => {
             fips = d.properties.GEOID;
             value = chr[fips] && chr[fips].od_mortality_rate != "" ? chr[fips].od_mortality_rate : 0;

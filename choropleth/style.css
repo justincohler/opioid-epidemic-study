@@ -139,7 +139,7 @@ Histogram
   }
 
 text {
-    fill: #444444;
+    fill: #777777;
     font-family: "Quick";
 }
 
@@ -181,7 +181,7 @@ Line Plot
 
 .source {
     font-size:12px;
-    color: #999999;
+    fill: #777777;
 }
 
 @font-face {

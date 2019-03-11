@@ -54,7 +54,7 @@ async function update_histogram(chr) {
         .attr("class", "bar")
         .attr("fill", (d) => bucketColorScale(d.bucket))
         .attr("x", (d) => hist_x(d.bucket))
-        .attr("y", (d) => params.histogram.height - hist_y(d.count))
+        .attr("y", (d) => params.histogram.height)
         .attr("width", hist_x.bandwidth())
         .transition()
         .duration(1000)
@@ -62,6 +62,8 @@ async function update_histogram(chr) {
             h = hist_y(d.count);
             // console.log("Count:", d.count, "Height: ", h);
             return h;
-        });
+        })
+        .attr("y", (d) => params.histogram.height - hist_y(d.count));
+
     return chr;
 }
