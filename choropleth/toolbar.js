@@ -1,3 +1,12 @@
+/* 
+    Source/Credit: https://www.w3schools.com/html/html5_draganddrop.asp
+
+    The above source offers a starting point for drag and drop of features
+    into the visualization toolbar. 
+
+    TODO - This still requires implementation.
+
+*/
 function allowDrop(event) {
     event.preventDefault();
 }
