@@ -8,6 +8,11 @@ body {
     font-size: 18px;
 }
 
+.title-text {
+    font-weight: bold;
+    font-size: 16px;
+}
+
 .btn-primary {
     border: 0px solid black;
     margin-top: 10px;

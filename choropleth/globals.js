@@ -77,10 +77,11 @@ var render = (year = 2018) => {
         .then(([geojson, chr]) => {
             make_histogram();
             make_choropleth([geojson, chr]);
-            make_line(chr);
+            make_line();
             return [geojson, chr];
         })
         .then(([geojson, chr]) => {
+            update_line(chr);
             return filter_year([geojson, chr, year]);
         })
         .then(([geojson, chr]) => {
@@ -94,6 +95,7 @@ async function reanimate(year) {
     YEAR = +year;
     Promise.all(promises)
         .then(([geojson, chr]) => {
+            update_line(chr);
             return filter_year([geojson, chr, year]);
         })
         .then(([geojson, chr]) => {
