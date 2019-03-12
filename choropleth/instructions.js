@@ -28,8 +28,8 @@ window.addEventListener("load", function () {
 
             setTimeout(() => {
                 d3.select(".instruction").remove();
-            }, 2000);
-        }, 2000);
+            }, 3000);
+        }, 3000);
         return;
     });
 });

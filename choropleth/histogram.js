@@ -11,20 +11,26 @@ async function make_histogram() {
 async function update_histogram(chr) {
     let hist_data = {};
     for (i = 0; i <= NTILES; i++) {
-        hist_data[i] = 0;
+        hist_data[i] = {
+            "count": 0,
+            "fips": []
+        };
     }
 
     let max_stat = arg_max(chr, "od_mortality_rate");
 
-    Object.values(chr)
-        .map(d => ntile(max_stat, d.od_mortality_rate, NTILES))
-        .forEach((d) => {
-            // console.log("Bucket: ", d)
-            hist_data[d] ? hist_data[d]++ : hist_data[d] = 1;
-        });
+    Object.entries(chr).forEach(([fips, value]) => {
+        bucket = ntile(max_stat, value.od_mortality_rate, NTILES);
+        if (bucket) {
+            hist_data[bucket].count++;
+            hist_data[bucket].fips.push(fips);
+        }
 
-    let data = Object.entries(hist_data).map((d) => {
-        return { "bucket": d[0], "count": d[1] };
+    });
+
+
+    let data = Object.entries(hist_data).map(([key, val]) => {
+        return { "bucket": +key, "count": val.count, "fips": val.fips };
     });
 
 
@@ -33,9 +39,13 @@ async function update_histogram(chr) {
         .domain(data.map((d) => d.bucket))
         .padding(0.1);
 
+    max_count = d3.max(Object.values(data), (d) => {
+        return d.count;
+    });
+
     let hist_y = d3.scaleLinear()
         .range([params.histogram.height, 0])
-        .domain(data.map((d) => d.count));
+        .domain([max_count, 0]);
 
     let histogram = d3.select("#histogram");
 
@@ -56,6 +66,18 @@ async function update_histogram(chr) {
         .attr("x", (d) => hist_x(d.bucket))
         .attr("y", (d) => params.histogram.height)
         .attr("width", hist_x.bandwidth())
+        .on("mouseover", (d) => {
+            d.fips.forEach((d) => {
+                d3.select("#poly-" + d)
+                    .classed("countiesHovered", true);
+            });
+        })
+        .on("mouseout", (d) => {
+            d.fips.forEach((d) => {
+                d3.select("#poly-" + d)
+                    .classed("countiesHovered", false);
+            });
+        })
         .transition()
         .duration(1000)
         .attr("height", (d) => {
@@ -63,7 +85,10 @@ async function update_histogram(chr) {
             // console.log("Count:", d.count, "Height: ", h);
             return h;
         })
-        .attr("y", (d) => params.histogram.height - hist_y(d.count));
+        .attr("y", (d) => {
+            console.log("Count:", d.count, "Height: ", hist_y(d.count));
+            return params.histogram.height - hist_y(d.count);
+        });
 
     return chr;
 }

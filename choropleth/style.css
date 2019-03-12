@@ -93,6 +93,11 @@ Choropleth
     stroke-width: 2px;
 }
 
+.countiesHovered {
+    stroke: #F9DC5c;
+    stroke-width: 2px;
+}
+
 .states {
     fill: none;
     stroke: #edf3f7;
@@ -184,6 +189,11 @@ Line Plot
     fill: #777777;
 }
 
+.summary {
+    font-size: 12px;
+    fill: #444444;
+}
+
 @font-face {
     font-family: "Quick";
     src: url(Quick.ttf);
@@ -198,6 +208,7 @@ Instructions
 }
 
 .instruction span {
+    font-size: 14px;
     margin-top: 20px;
     display: none;
     position: absolute;

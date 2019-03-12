@@ -8,7 +8,7 @@ const BRIGHT_GREEN = "#4CB944";
 const WHITE = "#CAFAFE";
 const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
-const NTILES = 25;
+const NTILES = 15;
 
 const params = {
     // Choropleth Settings

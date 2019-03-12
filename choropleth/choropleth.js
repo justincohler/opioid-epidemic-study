@@ -31,7 +31,7 @@ async function make_choropleth([us, chr]) {
         .enter().append("path")
         .attr("d", path)
         .attr("id", (d) => {
-            return d.properties.GEOID
+            return "poly-" + d.properties.GEOID
         })
 
     return chr
@@ -162,4 +162,17 @@ async function update_choropleth(chr) {
         .attr("x", params.choropleth.width / 2 - 50)
         .attr("y", params.choropleth.height - 50)
         .html("Source: CountyHealthRankings.org");
+
+
+    // Summary
+    // choropleth
+    //     .append("text")
+    //     .attr("class", "summary")
+    //     .attr("x", params.choropleth.width / 2 + 10)
+    //     .attr("y", params.choropleth.height / 2 + 110)
+    //     .html(`Drug Overdose Mortality Rates<br/>
+    //                 per 100k skyrocketed betweeen<br/>
+    //                 2014 and 2018.
+    //                 `);
+
 }
