@@ -102,13 +102,15 @@ async function update_choropleth(chr) {
             /* CLICK OFF */
             if (selected_counties.has(d.properties.GEOID)) {
                 selected_counties.delete(d.properties.GEOID);
+                console.log("Selected Counties: ", selected_counties);
                 // This is the last county unclicked
                 if (selected_counties.size == 0) {
-                    choropleth.selectAll(".counties")
+                    console.log("Making Everything opaque again");
+                    d3.selectAll(".counties")
                         .classed("activeCounty", false)
                         .classed("inactiveCounty", false);
 
-                    choropleth.select(this)
+                    d3.select(this)
                         .classed("activeCounty", false)
                         .classed("inactiveCounty", false);
 
@@ -128,7 +130,7 @@ async function update_choropleth(chr) {
             else {
                 // This is the first county clicked
                 if (selected_counties.size == 0) {
-                    choropleth.selectAll(`.counties`)
+                    d3.selectAll(`.counties`)
                         .classed("inactiveCounty", true);
 
                     d3.selectAll(".bar")
@@ -136,6 +138,7 @@ async function update_choropleth(chr) {
                 }
                 // Click "ON"
                 selected_counties.add(d.properties.GEOID);
+                console.log("Selected Counties: ", selected_counties);
 
                 d3.select("#bar-" + pctile)
                     .attr("fill-opacity", 1.0);

@@ -188,3 +188,44 @@ Line Plot
     font-family: "Quick";
     src: url(Quick.ttf);
 }
+
+/**============================================================================
+Instructions 
+(Source: https://stackoverflow.com/questions/12610409/tooltip-with-a-triangle)
+============================================================================**/
+.instruction {
+    position: relative;
+}
+
+.instruction span {
+    margin-top: 20px;
+    display: none;
+    position: absolute;
+    width: 200px;
+    padding: 5px;
+    z-index: 200;
+    background: rgba(0, 0, 0, .6);
+    border: 0px solid rgba(0, 0, 0, 0.6);
+    color: #edf3f7;
+    -moz-border-radius: 5px;
+    /* this works only in camino/firefox */
+    -webkit-border-radius: 5px;
+    /* this is just for Safari */
+}
+
+.instruction span:before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid rgba(0, 0, 0, 0.6);
+    left: 8px;
+    top: -7px;
+}
+
+.instruction span {
+    display: block;
+}
