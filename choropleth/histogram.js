@@ -17,10 +17,8 @@ async function update_histogram(chr) {
         };
     }
 
-    let max_stat = arg_max(chr, "od_mortality_rate");
-
     Object.entries(chr).forEach(([fips, value]) => {
-        bucket = ntile(max_stat, value.od_mortality_rate, NTILES);
+        bucket = ntile(MAX_STAT, value.od_mortality_rate, NTILES);
         if (bucket) {
             hist_data[bucket].count++;
             hist_data[bucket].fips.push(fips);
@@ -45,9 +43,20 @@ async function update_histogram(chr) {
 
     let hist_y = d3.scaleLinear()
         .range([params.histogram.height, 0])
-        .domain([max_count, 0]);
+        .domain([10, 0]);
 
     let histogram = d3.select("#histogram");
+
+    console.log(chr);
+    d3.select("#year-label")
+        .remove();
+
+    histogram.append("text")
+        .attr("id", "year-label")
+        .text(YEAR)
+        .attr("text-anchor", "middle")
+        .attr("x", (params.histogram.width) / 2)
+        .attr("y", 75);
 
     let g = histogram.append("g").attr("transform",
         `translate(${params.histogram.margin.left}, ${params.histogram.margin.top})`);
@@ -67,6 +76,7 @@ async function update_histogram(chr) {
         .attr("y", (d) => params.histogram.height)
         .attr("width", hist_x.bandwidth())
         .on("mouseover", (d) => {
+            console.log("Bar:", d);
             d.fips.forEach((d) => {
                 d3.select("#poly-" + d)
                     .classed("countiesHovered", true);

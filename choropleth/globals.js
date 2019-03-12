@@ -8,8 +8,8 @@ const BRIGHT_GREEN = "#4CB944";
 const WHITE = "#CAFAFE";
 const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
-const NTILES = 15;
-
+const NTILES = 20;
+const MAX_STAT = 93; // Maximum value of OD Mortality Rate
 const params = {
     // Choropleth Settings
     choropleth: {

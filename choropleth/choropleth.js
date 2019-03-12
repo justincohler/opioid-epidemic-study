@@ -41,8 +41,6 @@ async function update_choropleth(chr) {
 
     let choropleth = d3.select("#choropleth");
 
-    const MAX_STAT = arg_max(chr, "od_mortality_rate");
-
     // Tooltips
     tip = d3.tip()
         .attr('class', 'd3-tip')

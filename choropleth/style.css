@@ -3,6 +3,11 @@ body {
     font-family: Quick;
 }
 
+#year-label {
+    font-weight: bold;
+    font-size: 18px;
+}
+
 .btn-primary {
     border: 0px solid black;
     margin-top: 10px;
