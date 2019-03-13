@@ -10,8 +10,12 @@ const SKY = "#55BCC9";
 const MIDNIGHT = "#0B132B";
 const NTILES = 20;
 const MAX_STAT = 93; // Maximum value of OD Mortality Rate
+
+
+/**
+ * SVG Size Parameters
+ */
 const params = {
-    // Choropleth Settings
     choropleth: {
         height: 740,
         width: 900,
@@ -28,15 +32,13 @@ const params = {
         margin: { top: 20, right: 20, bottom: 20, left: 20 }
     }
 }
-
 const colorScale = d3.scaleLinear().domain([0, 82])
     .range([AQUA, RED]);
-
 const bucketColorScale = d3.scaleLinear().domain([0, NTILES])
     .range([AQUA, RED]);
 
 var YEAR = 2018;
-let fips = {};
+
 let selected_counties = new Set();
 let promises = [
     d3.json("wv_county_topo.json"),
@@ -60,7 +62,12 @@ filter_year = ([geojson, chr, year]) => {
     })
     return [geojson, fips_wise];
 }
-
+/**
+ * Return the maimum value of the given data object's value argument.
+ * 
+ * @param  {} data
+ * @param  {} arg
+ */
 arg_max = (data, arg) => {
     const max = d3.max(Object.values(data), (d) => {
         return d[arg];
@@ -68,11 +75,24 @@ arg_max = (data, arg) => {
 
     return max;
 }
-
+/**
+ * Return the NTILE for a given data point.
+ * 
+ * @param  {} max
+ * @param  {} val
+ * @param  {} buckets=100
+ */
 ntile = (max, val, buckets = 100) => Math.trunc(val / max * buckets);
 
-
-var render = (year = 2018) => {
+/**
+ * Read GeoJSON and CHR data, then populate all SVG plots.
+ * 
+ * The below line plot utilizes all years' data. 
+ * The below histogram and choropleth use a given year's data.
+ * 
+ * @param  {} year=2018
+ */
+render = (year = 2018) => {
     Promise.all(promises)
         .then(([geojson, chr]) => {
             make_histogram();
@@ -90,8 +110,13 @@ var render = (year = 2018) => {
         });
 
 }
-
-async function reanimate(year) {
+/**
+ * Update the line plot, choropleth, and histogram
+ * for the given year.
+ * 
+ * @param  {} year
+ */
+reanimate = (year) => {
     YEAR = +year;
     Promise.all(promises)
         .then(([geojson, chr]) => {

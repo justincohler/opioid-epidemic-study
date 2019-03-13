@@ -1,3 +1,6 @@
+/**
+ * Create housing for histogram SVG.
+ */
 async function make_histogram() {
 
     d3.select("#upper")
@@ -7,9 +10,16 @@ async function make_histogram() {
         .attr("width", params.histogram.width + params.histogram.margin.left + params.histogram.margin.right);
 }
 
-
+/**
+ * Update histogram with bars based on N
+ * n-tiles of the CHR OD-Mortality Rate data.
+ * 
+ * @param  {} chr
+ */
 async function update_histogram(chr) {
     let hist_data = {};
+
+    // Initialize Bucketed Object
     for (i = 0; i <= NTILES; i++) {
         hist_data[i] = {
             "count": 0,
@@ -17,6 +27,7 @@ async function update_histogram(chr) {
         };
     }
 
+    // Populate Bucketed Object
     Object.entries(chr).forEach(([fips, value]) => {
         bucket = ntile(MAX_STAT, value.od_mortality_rate, NTILES);
         if (bucket) {
@@ -26,20 +37,16 @@ async function update_histogram(chr) {
 
     });
 
-
+    // Reformat Bucketed Object into a flat List
     let data = Object.entries(hist_data).map(([key, val]) => {
         return { "bucket": +key, "count": val.count, "fips": val.fips };
     });
 
-
+    // Create Scales
     let hist_x = d3.scaleBand()
         .rangeRound([0, params.histogram.width])
         .domain(data.map((d) => d.bucket))
         .padding(0.1);
-
-    max_count = d3.max(Object.values(data), (d) => {
-        return d.count;
-    });
 
     let hist_y = d3.scaleLinear()
         .range([params.histogram.height, 0])
@@ -47,10 +54,12 @@ async function update_histogram(chr) {
 
     let histogram = d3.select("#histogram");
 
+    // Remove any pre-existing year title
     console.log(chr);
     d3.select("#year-label")
         .remove();
 
+    // Add the current year as a title
     histogram.append("text")
         .attr("id", "year-label")
         .text(YEAR)
@@ -58,6 +67,7 @@ async function update_histogram(chr) {
         .attr("x", (params.histogram.width) / 2)
         .attr("y", 75);
 
+    // Create the bottom bar
     let g = histogram.append("g").attr("transform",
         `translate(${params.histogram.margin.left}, ${params.histogram.margin.top})`);
 
@@ -65,6 +75,7 @@ async function update_histogram(chr) {
         .attr("transform", `translate(0,${params.histogram.height})`)
         .call(d3.axisBottom(hist_x).tickValues([]))
 
+    // Remove old bars then add new bars
     d3.selectAll(".bar").remove();
     g.selectAll(".bar")
         .data(data)
@@ -92,7 +103,6 @@ async function update_histogram(chr) {
         .duration(1000)
         .attr("height", (d) => {
             h = hist_y(d.count);
-            // console.log("Count:", d.count, "Height: ", h);
             return h;
         })
         .attr("y", (d) => {
