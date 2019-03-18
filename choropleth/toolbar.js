@@ -19,11 +19,34 @@ function drag(event) {
   event.dataTransfer.dropEffect = "copy";
 }
 
-// const data = [[0, 1], [32, 67], [12, 79]];
-// const result = regression.polynomial(data, { order: 3 });
+regress = () => {
+  d3.select("#calculator").on("input", () => {
+    console.log(this.value);
+  });
 
-const result = regression.linear([[0, 1], [32, 67], [12, 79]]);
-const gradient = result.equation[0];
-const yIntercept = result.equation[1];
+  regressor = "FAKE";
+  switch (regressor) {
+    case "Unemployed":
+      console.log("Unemployed");
+      break;
+    case "Food_Insecure":
+      console.log("Food Insecure");
+      break;
+    case "Preventable_Hosp":
+      console.log("Preventable_Hosp");
+      break;
+    case "Graduation_Rate":
+      console.log("Graduation_Rate");
+      break;
+    case "Household_Income":
+      console.log("Household_Income");
+      break;
+    case "Limited_Access":
+      console.log("Limited_Access");
+      break;
+    default:
+      break;
+  }
 
-console.log("Result", result, "Gradient", gradient, "Y-Intercept", yIntercept);
+  return;
+};
