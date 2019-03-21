@@ -13,8 +13,14 @@
 
   <body>
     <div class="container">
+      <div class="row title">
+        <h1>Wyoming County, West Virginia: <br/>Epicenter of the Opioid Epidemic</h1>
+      </div>
       <div class="row menubar">
-        <input id="calculator" type="text" placeholder="SEARCH..." />
+        <div class="col-6">
+          <input id="calculator" type="text" placeholder="SEARCH..." />
+        </div>
+        <div class="col"></div>
         <div id="toolbar_instruction"></div>
         <div class="dropdown">
           <button
@@ -128,11 +134,11 @@
         </button>
       </div>
       <div class="row underneath">
-        <div id="parent">
+        <div class="row" id="parent">
           <div id="wide"></div>
-          <div id="narrow">
-            <div id="upper"></div>
-            <div id="lower"></div>
+          <divid="narrow">
+            <div class="row" id="upper"></div>
+            <div class="row" id="lower"></div>
           </div>
         </div>
       </div>

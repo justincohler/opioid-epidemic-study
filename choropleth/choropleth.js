@@ -78,17 +78,33 @@ async function make_choropleth([us, chr]) {
       lon: 39.63,
       shift_x: -70,
       shift_y: 25
+    },
+    {
+      name: "Wyoming County",
+      lat: -81.56,
+      lon: 37.63,
+      shift_x: 0,
+      shift_y: -10
     }
   ];
 
   cities.forEach(city => {
-    choropleth
-      .append("circle")
-      .attr("cx", projection([city.lat, city.lon])[0])
-      .attr("cy", projection([city.lat, city.lon])[1])
-      .attr("r", 4)
-      .style("fill", "#f9dc5c");
-
+    if (city.name === "Wyoming County") {
+      choropleth
+        .append("rect")
+        .attr("x", projection([city.lat, city.lon])[0])
+        .attr("y", projection([city.lat, city.lon])[1])
+        .attr("width", 8)
+        .attr("height", 8)
+        .style("fill", "#f9dc5c");
+    } else {
+      choropleth
+        .append("circle")
+        .attr("cx", projection([city.lat, city.lon])[0])
+        .attr("cy", projection([city.lat, city.lon])[1])
+        .attr("r", 4)
+        .style("fill", "#f9dc5c");
+    }
     choropleth
       .append("text")
       .attr("x", city.shift_x + projection([city.lat, city.lon])[0])
@@ -121,7 +137,6 @@ async function update_choropleth(chr) {
       return text;
     });
   choropleth.call(tip);
-
   // County shapes
   choropleth
     .selectAll("path")
@@ -197,22 +212,31 @@ async function update_choropleth(chr) {
     .text("Source: CountyHealthRankings.org");
 
   // Summary
+  summary_x = params.choropleth.width / 2 - 10;
+  summary_y = params.choropleth.height / 2 + 140;
+
   choropleth
     .append("text")
-    .attr("x", params.choropleth.width / 2 + 10)
-    .attr("y", params.choropleth.height / 2 + 110)
+    .attr("x", summary_x)
+    .attr("y", summary_y)
+    .text(`West Virginia's`);
+
+  choropleth
+    .append("text")
+    .attr("x", summary_x)
+    .attr("y", summary_y + 25)
     .text(`Drug Overdose Mortality`);
 
   choropleth
     .append("text")
-    .attr("x", params.choropleth.width / 2 + 10)
-    .attr("y", params.choropleth.height / 2 + 135)
+    .attr("x", summary_x)
+    .attr("y", summary_y + 50)
     .text(`Rates per 100k skyrocketed`);
 
   choropleth
     .append("text")
-    .attr("x", params.choropleth.width / 2 + 10)
-    .attr("y", params.choropleth.height / 2 + 160)
+    .attr("x", summary_x)
+    .attr("y", summary_y + 75)
     .text(`betweeen 2014 and 2018.`);
 
   // Top-Four Cities Explanation
@@ -220,7 +244,7 @@ async function update_choropleth(chr) {
     .append("text")
     .attr("x", 20 + params.choropleth.margin.left)
     .attr("y", 150 + params.choropleth.margin.top)
-    .text(`The Top Four Cities`);
+    .text(`Top Four WV Cities`);
 
   choropleth
     .append("text")

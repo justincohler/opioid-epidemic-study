@@ -20,7 +20,6 @@ async function make_histogram() {
 
   d3.select("#histogram")
     .append("text")
-    // .attr("transform", "rotate(-90)")
     .attr("y", params.histogram.height + params.histogram.margin.top + 10)
     .attr("x", params.histogram.width / 2 + 20)
     .attr("dy", "1em")

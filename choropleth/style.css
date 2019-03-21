@@ -3,6 +3,13 @@ body {
   font-family: Quick;
 }
 
+.title {
+  color: #777777;
+  display: block;
+  text-align: center;
+  margin: 20px auto;
+}
+
 #year-label {
   font-size: 40px;
 }
