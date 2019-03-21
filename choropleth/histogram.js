@@ -132,3 +132,71 @@ async function update_histogram(chr) {
 
   return chr;
 }
+
+/**
+ * Animate histogram with bars based on N
+ * n-tiles of the CHR OD-Mortality Rate data.
+ *
+ * @param  {} chr
+ */
+async function animate_histogram(chr) {
+  let hist_data = {};
+
+  // Initialize Bucketed Object
+  for (i = 0; i <= NTILES; i++) {
+    hist_data[i] = {
+      count: 0,
+      fips: []
+    };
+  }
+
+  // Populate Bucketed Object
+  Object.entries(chr).forEach(([fips, value]) => {
+    bucket = ntile(MAX_STAT, value.od_mortality_rate, NTILES);
+    if (bucket) {
+      hist_data[bucket].count++;
+      hist_data[bucket].fips.push(fips);
+    }
+  });
+
+  // Reformat Bucketed Object into a flat List
+  let data = Object.entries(hist_data).map(([key, val]) => {
+    return { bucket: +key, count: val.count, fips: val.fips };
+  });
+
+  // Create Scales
+  let hist_x = d3
+    .scaleBand()
+    .rangeRound([0, params.histogram.width])
+    .domain(data.map(d => d.bucket))
+    .padding(0.1);
+
+  let hist_y = d3
+    .scaleLinear()
+    .range([params.histogram.height, 0])
+    .domain([10, 0]);
+
+  let histogram = d3.select("#histogram");
+
+  // Remove any pre-existing year title
+  d3.select("#year-label").remove();
+
+  // Add the current year as a title
+  histogram
+    .append("text")
+    .attr("id", "year-label")
+    .text(YEAR)
+    .attr("text-anchor", "middle")
+    .attr("x", params.histogram.width / 2)
+    .attr("y", 75);
+
+  data.forEach(d => {
+    d3.select("#bar-" + String(d.bucket))
+      .transition()
+      .duration(1000)
+      .attr("y", params.histogram.height - hist_y(d.count))
+      .attr("height", hist_y(d.count));
+  });
+
+  return chr;
+}

@@ -132,8 +132,9 @@ reanimate = year => {
       return filter_year([geojson, chr, year]);
     })
     .then(([geojson, chr]) => {
-      update_histogram(chr);
+      animate_histogram(chr);
       update_choropleth(chr);
+      highlight_counties();
       highlight_bars(chr);
     });
 };
@@ -142,6 +143,9 @@ render();
 
 AUTOPLAY = true;
 
+/**
+ * Sweep through years from 2014 to 2018 across charts.
+ */
 animate_years = () => {
   reanimate(2014);
   setTimeout(() => {
@@ -158,8 +162,17 @@ animate_years = () => {
   }, 2000);
 };
 
-animate_years();
+/**
+ * Remove all selected_counties and reanimate
+ */
+clear_selected = () => {
+  selected_counties.clear();
+  reanimate(YEAR);
+};
 
+/**
+ * Highlight all selected counties on choropleth.
+ */
 highlight_counties = () => {
   d3.selectAll(".counties path").classed("inactiveCounty", d => {
     if (selected_counties.size === 0) {
@@ -170,6 +183,10 @@ highlight_counties = () => {
   });
 };
 
+/**
+ * Given the selected county set, higlight the associated bars for
+ * each time interval.
+ */
 highlight_bars = chr => {
   d3.selectAll(".bar").classed("inactiveCounty", d => {
     selected_buckets = new Set();
@@ -185,6 +202,10 @@ highlight_bars = chr => {
   });
 };
 
+/**
+ * Given the selected county set, highlight the associated lines for
+ * each time interval
+ */
 highlight_lines = chr => {
   d3.selectAll(".line")
     .classed("activeLine", d => {

@@ -214,11 +214,11 @@ async function update_choropleth(chr) {
     .append("text")
     .attr("x", 20 + params.choropleth.margin.left)
     .attr("y", 150 + params.choropleth.margin.top)
-    .text(`Top Four WV Cities`);
+    .text(`Most Populous WV`);
 
   choropleth
     .append("text")
     .attr("x", 20 + params.choropleth.margin.left)
     .attr("y", 175 + params.choropleth.margin.top)
-    .text(`By Population`);
+    .text(`Cities Marked Below`);
 }

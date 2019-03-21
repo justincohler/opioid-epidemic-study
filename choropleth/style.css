@@ -1,6 +1,7 @@
 body {
   background-color: #edf3f7;
   font-family: Quick;
+  color: #777777;
 }
 
 h1 {
@@ -98,7 +99,7 @@ h1 span {
 
 .typeahead {
   font-family: Quick;
-  width: 860px;
+  width: 780px;
   padding: 6px;
   margin: 10px 20px 10px 0px;
   font-size: 1em;
