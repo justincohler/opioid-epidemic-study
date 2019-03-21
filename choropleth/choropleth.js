@@ -185,7 +185,7 @@ async function update_choropleth(chr) {
       highlight_lines(chr);
     })
     .transition()
-    .duration(2000)
+    .duration(1000)
     .attr("fill", d => {
       fips = d.properties.GEOID;
       value =
@@ -212,12 +212,14 @@ async function update_choropleth(chr) {
   // Top-Four Cities Explanation
   choropleth
     .append("text")
+    .attr("class", "robotic")
     .attr("x", 20 + params.choropleth.margin.left)
     .attr("y", 150 + params.choropleth.margin.top)
     .text(`Most Populous WV`);
 
   choropleth
     .append("text")
+    .attr("class", "robotic")
     .attr("x", 20 + params.choropleth.margin.left)
     .attr("y", 175 + params.choropleth.margin.top)
     .text(`Cities Marked Below`);

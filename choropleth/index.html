@@ -14,13 +14,11 @@
   <body>
     <div class="container">
       <div class="row title">
-        <h1><span>Wyoming County, West Virginia:</span> Epicenter of the Opioid Epidemic</h1>
+        <h1>The Center of the US Opioid Epidemic: West Virginia</span></h1>
       </div>
       <div class="row menubar">
         <div class="col-6">
-
-          
-          <input class="typeahead" id="calculator" type="text" placeholder="SEARCH for Counties..." />
+          <input class="typeahead" id="calculator" type="text" placeholder="SEARCH for a county..." />
         </div>
         <div class="col"></div>
         <div id="toolbar_instruction"></div>
@@ -55,25 +53,24 @@
           <button
             class="btn btn-secondary"
             type="button"
-            id="regress"
+            id="animate"
             onclick="animate_years()"
           >
             Animate
           </button>
         
-        <button
-        class="btn btn-primary"
-        type="button"
-        id="regress"
-        onclick="clear_selected()"
-      >
-        Reset
-      </button>
-      
+          <button
+          class="btn btn-primary"
+          type="button"
+          id="reset"
+          onclick="clear_selected()"
+        >
+          Reset
+        </button>
     </div>
   </div>
       <div class="overmap">
-        <p>In 2018, Wyoming County, WV had the highest drug OD mortality rate of any in the state. This isn't a new problem for the county. Click on individual counties or search for one in the search bar to explore the data's progression over time.</p>
+        <p>West Virginia, and specifically Wyoming County, WV has had among the highest drug OD mortality rates of any in the country. Click on individual counties or search for one in the search bar to explore county data in detail over time.</p>
       </div>
       <div class="row underneath">
         <div class="row" id="parent">
@@ -113,10 +110,6 @@
 
     <!-- Typeahead -->
     <script src="https://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
-
-    <!-- Simple Statistics for Regression-->
-    <script src="https://unpkg.com/simple-statistics@7.0.2/dist/simple-statistics.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sylvester/0.1.3/sylvester.js"></script>
 
     
     <!-- Visualization Scripts -->

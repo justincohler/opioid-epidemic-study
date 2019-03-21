@@ -4,12 +4,19 @@ body {
   color: #777777;
 }
 
+p {
+  font-family: "Consolas";
+  font-size: 17px;
+}
+
 h1 {
   font-size: 28px;
+  font-weight: bold;
 }
 
 h1 span {
-  font-weight: bold;
+  font-family: Consolas;
+  font-weight: 100;
 }
 
 .title {
@@ -179,6 +186,13 @@ Histogram
 .axis--x path {
   display: none;
 }
+.robotic {
+  font-family: Consolas;
+}
+
+.tick text {
+  font-family: Consolas;
+}
 
 text {
   fill: #777777;
@@ -232,7 +246,7 @@ Line Plot
 }
 
 .source {
-  font-size: 12px;
+  font-size: 14px;
   fill: #777777;
 }
 
@@ -263,8 +277,8 @@ Instructions
   width: 200px;
   padding: 5px;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  border: 0px solid rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 1);
+  border: 0px solid rgba(0, 0, 0, 1);
   color: #edf3f7;
   -moz-border-radius: 5px;
   /* this works only in camino/firefox */
@@ -280,7 +294,7 @@ Instructions
   position: absolute;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 8px solid rgba(0, 0, 0, 0.6);
+  border-bottom: 8px solid rgba(0, 0, 0, 1);
   left: 8px;
   top: -7px;
 }
