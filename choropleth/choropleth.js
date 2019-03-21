@@ -151,9 +151,7 @@ async function update_choropleth(chr) {
 
       d3.select("#bar-" + pctile).attr("fill", YELLOW);
 
-      lineID = ("#line-" + chr[d.properties.GEOID].county).toLowerCase();
-
-      d3.select(lineID).classed("hoverLine", true);
+      d3.select("#line-" + d.properties.GEOID).classed("hoverLine", true);
     })
     .on("mouseout", d => {
       tip.hide(d, this);
@@ -161,9 +159,7 @@ async function update_choropleth(chr) {
       od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
       pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
-      lineID = ("#line-" + chr[d.properties.GEOID].county).toLowerCase();
-
-      d3.select(lineID).classed("hoverLine", false);
+      d3.select("#line-" + d.properties.GEOID).classed("hoverLine", false);
 
       d3.select("#bar-" + pctile)
         .transition()
@@ -184,13 +180,9 @@ async function update_choropleth(chr) {
         selected_counties.delete(d.properties.GEOID);
       }
 
-      d3.selectAll(".counties path").classed("inactiveCounty", d => {
-        if (selected_counties.size === 0) {
-          return false;
-        } else {
-          return !selected_counties.has(d.properties.GEOID);
-        }
-      });
+      highlight_counties();
+      highlight_bars(chr);
+      highlight_lines(chr);
     })
     .transition()
     .duration(2000)
@@ -215,29 +207,7 @@ async function update_choropleth(chr) {
   summary_x = params.choropleth.width / 2 - 10;
   summary_y = params.choropleth.height / 2 + 140;
 
-  choropleth
-    .append("text")
-    .attr("x", summary_x)
-    .attr("y", summary_y)
-    .text(`West Virginia's`);
-
-  choropleth
-    .append("text")
-    .attr("x", summary_x)
-    .attr("y", summary_y + 25)
-    .text(`Drug Overdose Mortality`);
-
-  choropleth
-    .append("text")
-    .attr("x", summary_x)
-    .attr("y", summary_y + 50)
-    .text(`Rates per 100k skyrocketed`);
-
-  choropleth
-    .append("text")
-    .attr("x", summary_x)
-    .attr("y", summary_y + 75)
-    .text(`betweeen 2014 and 2018.`);
+  // West Virginia's Drug Overdose Mortality Rates per 100k skyrocketed between 2014 and 2018
 
   // Top-Four Cities Explanation
   choropleth

@@ -1,3 +1,8 @@
+/**
+ * Source/Credit: https://twitter.github.io/typeahead.js/examples/
+ * @param {List[String]} strs
+ */
+
 var substringMatcher = function(strs) {
   return function findMatches(q, cb) {
     q = q.toLowerCase();
@@ -21,66 +26,21 @@ var substringMatcher = function(strs) {
   };
 };
 
-var states = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia",
-  "Hawaii",
-  "Idaho",
-  "Illinois",
-  "Indiana",
-  "Iowa",
-  "Kansas",
-  "Kentucky",
-  "Louisiana",
-  "Maine",
-  "Maryland",
-  "Massachusetts",
-  "Michigan",
-  "Minnesota",
-  "Mississippi",
-  "Missouri",
-  "Montana",
-  "Nebraska",
-  "Nevada",
-  "New Hampshire",
-  "New Jersey",
-  "New Mexico",
-  "New York",
-  "North Carolina",
-  "North Dakota",
-  "Ohio",
-  "Oklahoma",
-  "Oregon",
-  "Pennsylvania",
-  "Rhode Island",
-  "South Carolina",
-  "South Dakota",
-  "Tennessee",
-  "Texas",
-  "Utah",
-  "Vermont",
-  "Virginia",
-  "Washington",
-  "West Virginia",
-  "Wisconsin",
-  "Wyoming"
-];
-
 load_counties = new Promise(resolve => {
   resolve(d3.tsv("county_fips.tsv"));
 });
 
 load_counties
-  .then(data => data.filter(d => d.State === "WV").map(d => d.Name))
+  .then(data =>
+    data
+      .filter(d => d.State === "WV")
+      .reduce((acc, d) => {
+        acc[d.Name.toLowerCase()] = d.FIPS;
+        return acc;
+      })
+  )
   .then(counties => {
+    console.log(counties);
     $(".typeahead").typeahead(
       {
         hint: true,
@@ -89,7 +49,22 @@ load_counties
       },
       {
         name: "counties",
-        source: substringMatcher(counties)
+        source: substringMatcher(Object.keys(counties))
       }
     );
+
+    $(".typeahead").on("keydown", function search(e) {
+      // If "Enter" key pressed
+      if (e.keyCode == 13) {
+        county = $(this)
+          .val()
+          .toLowerCase();
+        fips = counties[county];
+        console.log(fips);
+        if (fips) {
+          selected_counties.add(fips);
+          highlight_counties();
+        }
+      }
+    });
   });

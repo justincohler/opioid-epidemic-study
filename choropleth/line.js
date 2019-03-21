@@ -78,14 +78,16 @@ async function update_line(chr) {
       line_data[d.county].push({
         year: d.year,
         county: d.county,
-        od_mortality_rate: d.od_mortality_rate
+        od_mortality_rate: d.od_mortality_rate,
+        fips: d.FIPS
       });
     } else {
       line_data[d.county] = [
         {
           year: d.year,
           county: d.county,
-          od_mortality_rate: d.od_mortality_rate
+          od_mortality_rate: d.od_mortality_rate,
+          fips: d.FIPS
         }
       ];
     }
@@ -123,7 +125,7 @@ async function update_line(chr) {
     })
     .append("path")
     .attr("class", "line")
-    .attr("id", d => ("line-" + d.name).toLowerCase())
+    .attr("id", d => ("line-" + d.values.slice(-1)[0].fips).toLowerCase())
     .on("mouseover", function(d) {
       d3.selectAll(".line").style("opacity", 0.3);
       d3.selectAll(".circle").style("opacity", 0.3);

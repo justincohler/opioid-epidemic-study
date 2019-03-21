@@ -128,11 +128,13 @@ reanimate = year => {
   Promise.all(promises)
     .then(([geojson, chr]) => {
       update_line(chr);
+      highlight_lines(chr);
       return filter_year([geojson, chr, year]);
     })
     .then(([geojson, chr]) => {
       update_histogram(chr);
       update_choropleth(chr);
+      highlight_bars(chr);
     });
 };
 
@@ -157,3 +159,46 @@ animate_years = () => {
 };
 
 animate_years();
+
+highlight_counties = () => {
+  d3.selectAll(".counties path").classed("inactiveCounty", d => {
+    if (selected_counties.size === 0) {
+      return false;
+    } else {
+      return !selected_counties.has(d.properties.GEOID);
+    }
+  });
+};
+
+highlight_bars = chr => {
+  d3.selectAll(".bar").classed("inactiveCounty", d => {
+    selected_buckets = new Set();
+    selected_counties.forEach(selected_county => {
+      pctile = ntile(MAX_STAT, chr[selected_county].od_mortality_rate, NTILES);
+      selected_buckets.add(pctile);
+    });
+    if (selected_buckets.size === 0) {
+      return false;
+    } else {
+      return !selected_buckets.has(d.bucket);
+    }
+  });
+};
+
+highlight_lines = chr => {
+  d3.selectAll(".line")
+    .classed("activeLine", d => {
+      if (selected_counties.size === 0) {
+        return false;
+      } else {
+        return selected_counties.has(d.values.slice(-1)[0].fips);
+      }
+    })
+    .classed("inactiveLine", d => {
+      if (selected_counties.size === 0) {
+        return false;
+      } else {
+        return !selected_counties.has(d.values.slice(-1)[0].fips);
+      }
+    });
+};
