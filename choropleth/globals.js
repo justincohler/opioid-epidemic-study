@@ -139,28 +139,34 @@ reanimate = year => {
     });
 };
 
-render();
-
-AUTOPLAY = true;
-
 /**
  * Sweep through years from 2014 to 2018 across charts.
  */
 animate_years = () => {
-  reanimate(2014);
+  if (!AUTOPLAY) {
+    return;
+  }
+  reanimate(YEAR);
   setTimeout(() => {
-    reanimate(2015);
-    setTimeout(() => {
-      reanimate(2016);
-      setTimeout(() => {
-        reanimate(2017);
-        setTimeout(() => {
-          reanimate(2018);
-        }, 1500);
-      }, 1500);
-    }, 1500);
+    YEAR = YEAR === 2018 ? 2014 : YEAR + 1;
+    animate_years();
   }, 1500);
 };
+
+AUTOPLAY = false;
+
+auto_animate = () => {
+  if (!AUTOPLAY) {
+    AUTOPLAY = true;
+    d3.select("#animate").text("Stop");
+    animate_years();
+  } else {
+    AUTOPLAY = !AUTOPLAY;
+    d3.select("#animate").text("Animate");
+  }
+};
+
+render();
 
 /**
  * Remove all selected_counties and reanimate
