@@ -50,6 +50,53 @@ async function make_choropleth([us, chr]) {
       return "poly-" + d.properties.GEOID;
     });
 
+  let cities = [
+    {
+      name: "Charleston",
+      lat: -81.63,
+      lon: 38.35,
+      shift_x: -30,
+      shift_y: -10
+    },
+    {
+      name: "Huntington",
+      lat: -82.45,
+      lon: 38.42,
+      shift_x: -10,
+      shift_y: 25
+    },
+    {
+      name: "Parkersburg",
+      lat: -81.56,
+      lon: 39.27,
+      shift_x: 0,
+      shift_y: 25
+    },
+    {
+      name: "Morgantown",
+      lat: -79.96,
+      lon: 39.63,
+      shift_x: -70,
+      shift_y: 25
+    }
+  ];
+
+  cities.forEach(city => {
+    choropleth
+      .append("circle")
+      .attr("cx", projection([city.lat, city.lon])[0])
+      .attr("cy", projection([city.lat, city.lon])[1])
+      .attr("r", 4)
+      .style("fill", "#f9dc5c");
+
+    choropleth
+      .append("text")
+      .attr("x", city.shift_x + projection([city.lat, city.lon])[0])
+      .attr("y", city.shift_y + projection([city.lat, city.lon])[1])
+      .classed("city-label", true)
+      .html(city.name);
+  });
+
   return chr;
 }
 
@@ -111,48 +158,39 @@ async function update_choropleth(chr) {
         });
     })
     .on("click", function(d) {
+      current_county = this;
+
       od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
       pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
-      /* CLICK OFF */
-      if (selected_counties.has(d.properties.GEOID)) {
-        selected_counties.delete(d.properties.GEOID);
-        console.log("Selected Counties: ", selected_counties);
-        // This is the last county unclicked
-        if (selected_counties.size == 0) {
-          console.log("Making Everything opaque again");
-          d3.selectAll(".counties")
-            .classed("activeCounty", false)
-            .classed("inactiveCounty", false);
-
-          d3.select(this)
-            .classed("activeCounty", false)
-            .classed("inactiveCounty", false);
-
-          d3.selectAll(".bar").attr("fill-opacity", 0.9);
-        } else {
-          d3.select(this)
-            .classed("inactiveCounty", true)
-            .classed("activeCounty", false);
-
-          d3.select("#bar-" + pctile).attr("fill-opacity", 0.3);
-        }
-      } else {
-      /* CLICK ON */
-        // This is the first county clicked
-        if (selected_counties.size == 0) {
-          d3.selectAll(`.counties`).classed("inactiveCounty", true);
-
-          d3.selectAll(".bar").attr("fill-opacity", 0.3);
-        }
-        // Click "ON"
+      if (!selected_counties.has(d.properties.GEOID)) {
+        /* CLICK ON */
         selected_counties.add(d.properties.GEOID);
-        console.log("Selected Counties: ", selected_counties);
-
-        d3.select("#bar-" + pctile).attr("fill-opacity", 1.0);
-
-        d3.select(this).classed("activeCounty", true);
+      } else {
+        /* CLICK OFF */
+        selected_counties.delete(d.properties.GEOID);
       }
+      if (selected_counties.size == 0) {
+        d3.selectAll(".counties").classed("inactiveCounty", false);
+      } else {
+        d3.selectAll(".counties").classed("inactiveCounty", true);
+        selected_counties.forEach(selected_county => {
+          d3.select("#poly-" + selected_county).classed(
+            "inactiveCounty",
+            false
+          );
+        });
+      }
+      console.log("Selected Counties:", selected_counties);
+      d3.selectAll(".counties").classed("inactiveCounty", (_, i, nodes) => {
+        console.log(nodes[i]);
+        return false;
+      });
+
+      //   .classed("inactiveCounty", (d, i, nodes) => {
+      //   console.log(nodes);
+      //   console.log(this.id);
+      // });
     })
     .transition()
     .duration(2000)
@@ -174,13 +212,24 @@ async function update_choropleth(chr) {
     .html("Source: CountyHealthRankings.org");
 
   // Summary
-  // choropleth
-  //     .append("text")
-  //     .attr("class", "summary")
-  //     .attr("x", params.choropleth.width / 2 + 10)
-  //     .attr("y", params.choropleth.height / 2 + 110)
-  //     .html(`Drug Overdose Mortality Rates<br/>
-  //                 per 100k skyrocketed betweeen<br/>
-  //                 2014 and 2018.
-  //                 `);
+  choropleth
+    .append("text")
+    .attr("class", "summary")
+    .attr("x", params.choropleth.width / 2 + 10)
+    .attr("y", params.choropleth.height / 2 + 110)
+    .html(`Drug Overdose Mortality`);
+
+  choropleth
+    .append("text")
+    .attr("class", "summary")
+    .attr("x", params.choropleth.width / 2 + 10)
+    .attr("y", params.choropleth.height / 2 + 125)
+    .html(`Rates per 100k skyrocketed`);
+
+  choropleth
+    .append("text")
+    .attr("class", "summary")
+    .attr("x", params.choropleth.width / 2 + 10)
+    .attr("y", params.choropleth.height / 2 + 140)
+    .html(`betweeen 2014 and 2018.`);
 }

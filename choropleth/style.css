@@ -4,8 +4,11 @@ body {
 }
 
 #year-label {
-  font-weight: bold;
-  font-size: 18px;
+  font-size: 40px;
+}
+
+.city-label {
+  fill: #edf3f7 !important;
 }
 
 .title-text {
@@ -80,7 +83,7 @@ body {
 
 #calculator {
   font-family: Quick;
-  width: 838px;
+  width: 712px;
   padding: 6px;
   margin: 10px 20px 10px 50px;
   font-size: 1em;
@@ -208,8 +211,9 @@ Line Plot
 }
 
 .summary {
-  font-size: 12px;
-  fill: #444444;
+  font-size: 16px;
+  line-height: 1em;
+  fill: #777777;
 }
 
 @font-face {
