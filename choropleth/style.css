@@ -5,7 +5,7 @@ body {
 }
 
 p {
-  font-family: "Consolas";
+  font-family: "Open Sans";
   font-size: 17px;
 }
 
@@ -106,7 +106,7 @@ h1 span {
 
 .typeahead {
   font-family: Quick;
-  width: 780px;
+  width: 725px;
   padding: 6px;
   margin: 10px 20px 10px 0px;
   font-size: 1em;
@@ -301,4 +301,15 @@ Instructions
 
 .instruction span {
   display: block;
+}
+
+#footer {
+  padding: 20px;
+  background-color: #0f7173;
+  color: #edf3f7;
+}
+
+#footer a {
+  font-family: "Open Sans";
+  color: #0b132b;
 }
