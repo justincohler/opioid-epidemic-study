@@ -12,14 +12,14 @@ regressors = [];
 
 function drag(event) {
   // console.log(event.target.id);
-  let text = regressors.length == 0 ? event.target.id : ", " + event.target.id;
+  let text = regressors.length == 0 ? event.target.id : "," + event.target.id;
   regressors.push(event.target.id);
   event.dataTransfer.setData("text", text);
   event.dataTransfer.effectAllowed = "copyMove";
   event.dataTransfer.dropEffect = "copy";
 }
 
-regress = () => {
+regress_bkp = () => {
   d3.select("#calculator").on("input", () => {
     console.log(this.value);
   });

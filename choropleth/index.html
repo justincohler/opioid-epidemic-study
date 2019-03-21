@@ -14,11 +14,13 @@
   <body>
     <div class="container">
       <div class="row title">
-        <h1>Wyoming County, West Virginia: <br/>Epicenter of the Opioid Epidemic</h1>
+        <h1><span>Wyoming County, West Virginia:</span> Epicenter of the Opioid Epidemic</h1>
       </div>
       <div class="row menubar">
         <div class="col-6">
-          <input id="calculator" type="text" placeholder="SEARCH..." />
+
+          
+          <input class="typeahead" id="calculator" type="text" placeholder="SEARCH for Counties..." />
         </div>
         <div class="col"></div>
         <div id="toolbar_instruction"></div>
@@ -75,7 +77,7 @@
 
         <button
           type="button"
-          id="Unemployed"
+          id="unemployed"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -85,7 +87,7 @@
 
         <button
           type="button"
-          id="Food_Insecure"
+          id="food_insecure"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -95,7 +97,7 @@
 
         <button
           type="button"
-          id="Preventable_Hosp"
+          id="preventable_hosp"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -105,7 +107,7 @@
 
         <button
           type="button"
-          id="Graduation_Rate"
+          id="graduation_rate"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -115,7 +117,7 @@
 
         <button
           type="button"
-          id="Household_Income"
+          id="household_income"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -125,7 +127,7 @@
 
         <button
           type="button"
-          id="Limited_Access"
+          id="limited_access"
           draggable="true"
           ondragstart="drag(event)"
           class="btn btn-secondary"
@@ -169,17 +171,20 @@
       crossorigin="anonymous"
     ></script>
 
+    <!-- Typeahead -->
+    <script src="https://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
+
     <!-- Simple Statistics for Regression-->
     <script src="https://unpkg.com/simple-statistics@7.0.2/dist/simple-statistics.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sylvester/0.1.3/sylvester.js"></script>
 
-    <!-- https://github.com/flurry/Lyric -->
-    <script src="lyric.js"></script>
+    
     <!-- Visualization Scripts -->
     <script src="histogram.js"></script>
     <script src="line.js"></script>
     <script src="choropleth.js"></script>
     <script src="toolbar.js"></script>
+    <script src="typeahead.js"></script>
     <script src="globals.js"></script>
     <script src="instructions.js"></script>
   </body>

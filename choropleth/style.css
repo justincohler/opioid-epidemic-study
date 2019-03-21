@@ -3,6 +3,14 @@ body {
   font-family: Quick;
 }
 
+h1 {
+  font-size: 28px;
+}
+
+h1 span {
+  font-weight: bold;
+}
+
 .title {
   color: #777777;
   display: block;
@@ -88,15 +96,19 @@ body {
   flex: 1;
 }
 
-#calculator {
+.typeahead {
   font-family: Quick;
   width: 712px;
   padding: 6px;
-  margin: 10px 20px 10px 50px;
+  margin: 10px 20px 10px 0px;
   font-size: 1em;
   border-radius: 5px;
   box-shadow: none;
   border: 1px solid #aaaaaa;
+}
+
+pre {
+  margin-left: 10px !important;
 }
 
 #bar-NaN {
