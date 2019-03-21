@@ -22,10 +22,10 @@ async function make_histogram() {
     .append("text")
     // .attr("transform", "rotate(-90)")
     .attr("y", params.histogram.height + params.histogram.margin.top + 10)
-    .attr("x", params.histogram.width / 2)
+    .attr("x", params.histogram.width / 2 + 20)
     .attr("dy", "1em")
     .style("text-anchor", "middle")
-    .text("OD Mortality Rate Distribution");
+    .text("Distribution of OD Mortality by County");
 }
 
 /**

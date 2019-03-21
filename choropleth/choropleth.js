@@ -158,8 +158,6 @@ async function update_choropleth(chr) {
         });
     })
     .on("click", function(d) {
-      current_county = this;
-
       od_mortality_rate = chr[d.properties.GEOID].od_mortality_rate;
       pctile = ntile(MAX_STAT, od_mortality_rate, NTILES);
 
@@ -170,27 +168,17 @@ async function update_choropleth(chr) {
         /* CLICK OFF */
         selected_counties.delete(d.properties.GEOID);
       }
-      if (selected_counties.size == 0) {
-        d3.selectAll(".counties").classed("inactiveCounty", false);
-      } else {
-        d3.selectAll(".counties").classed("inactiveCounty", true);
-        selected_counties.forEach(selected_county => {
-          d3.select("#poly-" + selected_county).classed(
-            "inactiveCounty",
-            false
-          );
-        });
-      }
-      console.log("Selected Counties:", selected_counties);
-      d3.selectAll(".counties").classed("inactiveCounty", (_, i, nodes) => {
-        console.log(nodes[i]);
-        return false;
-      });
 
-      //   .classed("inactiveCounty", (d, i, nodes) => {
-      //   console.log(nodes);
-      //   console.log(this.id);
-      // });
+      d3.selectAll(".counties path").classed(
+        "inactiveCounty",
+        (d, i, nodes) => {
+          if (selected_counties.size === 0) {
+            return false;
+          } else {
+            return !selected_counties.has(d.properties.GEOID);
+          }
+        }
+      );
     })
     .transition()
     .duration(2000)
@@ -209,27 +197,37 @@ async function update_choropleth(chr) {
     .attr("class", "source")
     .attr("x", params.choropleth.width / 2 - 50)
     .attr("y", params.choropleth.height - 50)
-    .html("Source: CountyHealthRankings.org");
+    .text("Source: CountyHealthRankings.org");
 
   // Summary
   choropleth
     .append("text")
-    .attr("class", "summary")
     .attr("x", params.choropleth.width / 2 + 10)
     .attr("y", params.choropleth.height / 2 + 110)
-    .html(`Drug Overdose Mortality`);
+    .text(`Drug Overdose Mortality`);
 
   choropleth
     .append("text")
-    .attr("class", "summary")
     .attr("x", params.choropleth.width / 2 + 10)
-    .attr("y", params.choropleth.height / 2 + 125)
-    .html(`Rates per 100k skyrocketed`);
+    .attr("y", params.choropleth.height / 2 + 135)
+    .text(`Rates per 100k skyrocketed`);
 
   choropleth
     .append("text")
-    .attr("class", "summary")
     .attr("x", params.choropleth.width / 2 + 10)
-    .attr("y", params.choropleth.height / 2 + 140)
-    .html(`betweeen 2014 and 2018.`);
+    .attr("y", params.choropleth.height / 2 + 160)
+    .text(`betweeen 2014 and 2018.`);
+
+  // Top-Four Cities Explanation
+  choropleth
+    .append("text")
+    .attr("x", 20 + params.choropleth.margin.left)
+    .attr("y", 150 + params.choropleth.margin.top)
+    .text(`The Top Four Cities`);
+
+  choropleth
+    .append("text")
+    .attr("x", 20 + params.choropleth.margin.left)
+    .attr("y", 175 + params.choropleth.margin.top)
+    .text(`By Population`);
 }
