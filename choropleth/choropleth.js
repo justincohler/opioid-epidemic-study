@@ -169,16 +169,13 @@ async function update_choropleth(chr) {
         selected_counties.delete(d.properties.GEOID);
       }
 
-      d3.selectAll(".counties path").classed(
-        "inactiveCounty",
-        (d, i, nodes) => {
-          if (selected_counties.size === 0) {
-            return false;
-          } else {
-            return !selected_counties.has(d.properties.GEOID);
-          }
+      d3.selectAll(".counties path").classed("inactiveCounty", d => {
+        if (selected_counties.size === 0) {
+          return false;
+        } else {
+          return !selected_counties.has(d.properties.GEOID);
         }
-      );
+      });
     })
     .transition()
     .duration(2000)
